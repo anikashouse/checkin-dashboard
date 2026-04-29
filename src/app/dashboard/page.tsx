@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import SidebarNav from '@/components/SidebarNav'
 import Calendar from '@/components/Calendar'
+import PropertyCard from '@/components/PropertyCard'
 import Link from 'next/link'
 
 export default async function Dashboard() {
@@ -71,7 +72,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Calendar */}
-          <div className="mb-6">
+          <div className="mb-8">
             <Calendar
               reservations={reservations as any}
               year={currentYear}
@@ -79,33 +80,57 @@ export default async function Dashboard() {
             />
           </div>
 
+          {/* Properties */}
+          {properties && properties.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">PROPIEDADES</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {properties.slice(0, 2).map((property, idx) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                    reservations={reservations as any}
+                    index={idx}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Reservation Summary */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">RESUMEN DE RESERVAS</h2>
-            {reservations && reservations.length > 0 ? (
-              <div className="space-y-3">
-                <p className="text-slate-600">Total de reservas: <span className="font-bold">{reservations.length}</span></p>
-                <div className="grid grid-cols-2 gap-4">
+          {reservations && reservations.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">RESUMEN DE RESERVAS</h2>
+              <div className="space-y-4">
+                <p className="text-slate-600">Total de reservas: <span className="font-bold text-xl">{reservations.length}</span></p>
+                <div className="grid grid-cols-3 gap-4">
                   <div className="p-3 bg-blue-50 rounded border border-blue-200">
-                    <p className="text-sm text-slate-600">Próximas reservas</p>
-                    <p className="text-xl font-bold text-blue-900">
+                    <p className="text-sm text-slate-600">Próximas</p>
+                    <p className="text-2xl font-bold text-blue-900">
                       {reservations.filter(r => new Date(r.checkIn) > now).length}
                     </p>
                   </div>
                   <div className="p-3 bg-green-50 rounded border border-green-200">
-                    <p className="text-sm text-slate-600">Huéspedes activos</p>
-                    <p className="text-xl font-bold text-green-900">
+                    <p className="text-sm text-slate-600">Activas</p>
+                    <p className="text-2xl font-bold text-green-900">
                       {reservations.filter(r => new Date(r.checkIn) <= now && new Date(r.checkOut) > now).length}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded border border-purple-200">
+                    <p className="text-sm text-slate-600">Completadas</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {reservations.filter(r => new Date(r.checkOut) <= now).length}
                     </p>
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-slate-500">
-                No reservations to display
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          {!reservations || reservations.length === 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center text-slate-500">
+              Sin reservas en este momento
+            </div>
+          )}
         </div>
       </div>
     </div>

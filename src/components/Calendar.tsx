@@ -99,7 +99,7 @@ export default function Calendar({ reservations, year, month }: CalendarProps) {
           {calendarDays.map((day, idx) => (
             <div
               key={idx}
-              className="border-r border-b border-gray-300 p-3 min-h-40"
+              className="border-r border-b border-gray-300 p-2 min-h-28"
               style={{
                 borderRight: idx % 7 === 6 ? 'none' : undefined,
               }}

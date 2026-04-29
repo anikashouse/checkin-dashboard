@@ -80,3 +80,213 @@
  GET /dashboard 200 in 1039ms
  ✓ Compiled in 426ms (935 modules)
  GET /dashboard 200 in 146ms
+ ✓ Compiled in 413ms (935 modules)
+ GET /dashboard 200 in 146ms
+ ✓ Compiled in 475ms (913 modules)
+ GET /dashboard 200 in 266ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Mikel\Documents\checkin-dashboard\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\Users\Mikel\Documents\checkin-dashboard\.next\cache\webpack\server-development\0.pack.gz'
+ ✓ Compiled in 349ms (913 modules)
+ GET /dashboard 200 in 203ms
+ ○ Compiling / ...
+ ✓ Compiled / in 586ms (945 modules)
+ GET / 200 in 902ms
+ ⨯ Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\page.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1955ms (1305 modules)
+ ⨯ Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\pages\_document.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\pages\_document.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\page.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+ GET /dashboard 500 in 6794ms
+ GET /dashboard 500 in 351ms
+[Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+ GET /dashboard 500 in 8304ms
+ GET /dashboard 500 in 366ms
+ ✓ Compiled /favicon.ico in 274ms (910 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json',
+  page: '/favicon.ico'
+}
+ GET /favicon.ico 500 in 487ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\Mikel\Documents\checkin-dashboard\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\Mikel\Documents\checkin-dashboard\.next\cache\webpack\client-development-fallback\0.pack.gz'
+ ⨯ Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\favicon.ico\route.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+Error: Cannot find module './996.js'
+Require stack:
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\webpack-runtime.js
+- C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\favicon.ico\route.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\require.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\load-components.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\utils.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\options.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\swc\index.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\config.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\next.js
+- C:\Users\Mikel\Documents\checkin-dashboard\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14792)
+    at Object.<anonymous> (C:\Users\Mikel\Documents\checkin-dashboard\.next\server\app\dashboard\page.js:2:14858) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/dashboard'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json'
+}
+ GET /dashboard 500 in 652ms
+ GET /dashboard 500 in 292ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\Mikel\Documents\checkin-dashboard\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Mikel\\Documents\\checkin-dashboard\\.next\\routes-manifest.json',
+  page: '/favicon.ico'
+}
+ GET /favicon.ico 500 in 64ms
+ ✓ Compiled in 407ms (1322 modules)
+ ✓ Compiled in 564ms (1178 modules)
+ ✓ Compiled in 163ms (411 modules)
+ ✓ Compiled in 654ms (1178 modules)
+ ✓ Compiled in 292ms (1178 modules)
+ ✓ Compiled in 311ms (1179 modules)
