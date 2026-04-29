@@ -246,6 +246,7 @@ NEXTAUTH_URL=https://yourdomain.com
 
 ```
 [  ] Part 1: User Setup (Manual guide)
+
 [✓] Part 2.1: Authentication
     - NextAuth configured with Google OAuth
     - Users saved to Supabase on first login
@@ -258,19 +259,48 @@ NEXTAUTH_URL=https://yourdomain.com
     - RLS policies configured for both tables
     - Each user can only see their own data
     
-    Next: Update API endpoints to filter by user_id
-[  ] Part 2.3: API Endpoints
-[  ] Part 2.4: UI Components
+[✓] Part 2.3: API Endpoints
+    - All endpoints filter by user_id
+    - property_id filtering in queries
+    - Supabase service role key configured
+
+[✓] Part 2.4: UI Components - PARTIAL
+    [✓] Dashboard layout (dark sidebar + light content)
+    [✓] Calendar component (month view with reservations)
+    [✓] Property cards (with reservation counts)
+    [✓] Reservation summary (próximas, activas, completadas)
+    [✓] Property detail page (/dashboard/[id])
+    [ ] Edit property modal
+    [ ] Add property form
+    
 [  ] Part 2.5: User Profile
 [  ] Part 3.1: Environment Setup
-[  ] Part 3.2: Database Initialization
-[  ] Part 3.3: Deploy to Vercel
+[✓] Part 3.2: Database Initialization
+    - Supabase project configured
+    - Tables created and synced
+    
+[✓] Part 3.3: Deploy to Vercel
+    - Deployed and live at checkin-dashboard-eight.vercel.app
+    - Auto-deploy from GitHub main branch
+    
 [  ] Part 3.4: Domain & SSL
 [  ] Part 3.5: Monitoring
-[  ] Part 4.1: Multi-property
+
+[✓] Part 4.1: Multi-property Support - PARTIAL
+    [✓] Users can add multiple properties
+    [✓] Dashboard shows all user's properties
+    [✓] Property-specific calendar view
+    [ ] Bulk operations (sync all)
+    [ ] Property-specific settings
+    
 [  ] Part 4.2: Team Management
 [  ] Part 4.3: API Keys
 [  ] Part 4.4: Webhooks
+
+[  ] ADDITIONAL: Mossos Integration
+    [ ] Status badges for Mossos uploads
+    [ ] Sync to Mossos API
+    [ ] Checkin form with Mossos code
 ```
 
 ---
