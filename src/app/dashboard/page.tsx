@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
 
-  if (!session) {
+  if (!session?.user?.id) {
     redirect('/auth/signin')
   }
 

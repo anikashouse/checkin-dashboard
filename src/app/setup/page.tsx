@@ -6,7 +6,7 @@ import { SetupForm } from './form'
 export default async function SetupPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session) {
+  if (!session?.user?.id) {
     redirect('/auth/signin')
   }
 
