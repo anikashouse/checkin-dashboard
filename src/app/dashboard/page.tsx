@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import SidebarNav from '@/components/SidebarNav'
-import UserMenu from '@/components/UserMenu'
+import Link from 'next/link'
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
@@ -39,7 +39,15 @@ export default async function Dashboard() {
         <SidebarNav properties={properties as any} />
 
         <div className="p-4 border-t border-slate-700 mt-auto">
-          <UserMenu userName={userName} userEmail={session?.user?.email} />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+              {userName?.[0] || 'U'}
+            </div>
+            <div className="text-sm">
+              <p className="font-medium">{userName || 'User'}</p>
+              <p className="text-xs text-slate-400">{session?.user?.email}</p>
+            </div>
+          </div>
         </div>
       </div>
 
