@@ -17,9 +17,9 @@ export const authOptions: NextAuthOptions = {
       try {
         const { data: existingUser } = await supabase
           .from('users')
-          .select('*')
-          .eq('email', user.email)
-          .single()
+          .select('id')
+          .eq('email', user.email!)
+          .maybeSingle()
 
         if (!existingUser) {
           const { data: newUser } = await supabase
@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               image: user.image,
             })
-            .select()
+            .select('id')
             .single()
 
           return !!newUser
@@ -42,17 +42,25 @@ export const authOptions: NextAuthOptions = {
       }
     },
 
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
+    async jwt({ token, user, account }) {
+      if (user?.email) {
         token.email = user.email
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', user.email)
+          .maybeSingle()
+
+        if (dbUser?.id) {
+          token.sub = dbUser.id
+        }
       }
       return token
     },
 
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string
+        session.user.id = token.sub as string
         session.user.email = token.email as string
       }
       return session
