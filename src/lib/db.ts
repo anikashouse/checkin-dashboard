@@ -59,7 +59,7 @@ export async function getAllReservations(): Promise<Reservation[]> {
   return data.map(rowToReservation)
 }
 
-function parseIcalText(text: string): Array<{
+export function parseIcalText(text: string): Array<{
   airbnbCode: string
   checkIn: string
   checkOut: string
