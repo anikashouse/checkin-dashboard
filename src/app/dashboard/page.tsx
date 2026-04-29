@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
+  const userEmail = session?.user?.email
 
   if (!userId) {
     redirect('/auth/signin')
@@ -26,7 +27,7 @@ export default async function Dashboard() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
           <div className="text-sm text-slate-600">
-            {session.user.email}
+            {userEmail}
           </div>
         </div>
 
