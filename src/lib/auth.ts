@@ -1,6 +1,6 @@
 ﻿import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import { supabase } from './supabase'
+import { supabaseAdmin } from './supabase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,14 +15,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       try {
-        const { data: existingUser } = await supabase
+        if (!supabaseAdmin) {
+          console.error('Supabase admin client not initialized')
+          return false
+        }
+
+        const { data: existingUser } = await supabaseAdmin
           .from('users')
           .select('id')
           .eq('email', user.email!)
           .maybeSingle()
 
         if (!existingUser) {
-          const { data: newUser } = await supabase
+          const { data: newUser, error } = await supabaseAdmin
             .from('users')
             .insert({
               email: user.email,
@@ -32,20 +37,25 @@ export const authOptions: NextAuthOptions = {
             .select('id')
             .single()
 
+          if (error) {
+            console.error('Error creating user:', error)
+            return false
+          }
+
           return !!newUser
         }
 
         return true
       } catch (error) {
         console.error('Sign in error:', error)
-        return true
+        return false
       }
     },
 
-    async jwt({ token, user, account }) {
-      if (user?.email) {
+    async jwt({ token, user }) {
+      if (user?.email && supabaseAdmin) {
         token.email = user.email
-        const { data: dbUser } = await supabase
+        const { data: dbUser } = await supabaseAdmin
           .from('users')
           .select('id')
           .eq('email', user.email)
