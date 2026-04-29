@@ -17,12 +17,12 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- RLS Policy: Users can only see their own data
 CREATE POLICY "Users can view own data"
   ON users FOR SELECT
-  USING (auth.uid()::text = id::text);
+  USING (auth.uid() = id);
 
 -- RLS Policy: Users can update their own data
 CREATE POLICY "Users can update own data"
   ON users FOR UPDATE
-  USING (auth.uid()::text = id::text);
+  USING (auth.uid() = id);
 
 -- Update properties table to link to users
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE CASCADE;
@@ -33,19 +33,19 @@ CREATE INDEX IF NOT EXISTS idx_properties_user_id ON properties(user_id);
 -- RLS Policy: Users can only see their own properties
 CREATE POLICY "Users can view own properties"
   ON properties FOR SELECT
-  USING (user_id = (SELECT id FROM users WHERE id = (auth.uid()::text)::uuid));
+  USING (user_id = auth.uid());
 
 -- RLS Policy: Users can only update their own properties
 CREATE POLICY "Users can update own properties"
   ON properties FOR UPDATE
-  USING (user_id = (SELECT id FROM users WHERE id = (auth.uid()::text)::uuid));
+  USING (user_id = auth.uid());
 
 -- RLS Policy: Users can only delete their own properties
 CREATE POLICY "Users can delete own properties"
   ON properties FOR DELETE
-  USING (user_id = (SELECT id FROM users WHERE id = (auth.uid()::text)::uuid));
+  USING (user_id = auth.uid());
 
 -- RLS Policy: Users can only insert properties for themselves
 CREATE POLICY "Users can insert own properties"
   ON properties FOR INSERT
-  WITH CHECK (user_id = (SELECT id FROM users WHERE id = (auth.uid()::text)::uuid));
+  WITH CHECK (user_id = auth.uid());
