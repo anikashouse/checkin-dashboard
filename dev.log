@@ -53,3 +53,30 @@
  ✓ Compiled /favicon.ico in 428ms (685 modules)
  GET /favicon.ico 200 in 585ms
  GET /favicon.ico 200 in 13ms
+ ⨯ TypeError: Cannot read properties of null (reading 'filter')
+    at getReservationsForDay (src\components\Calendar.tsx:47:25)
+    at eval (src\components\Calendar.tsx:77:46)
+    at Array.map (<anonymous>)
+    at eval (src\components\Calendar.tsx:76:16)
+    at Array.map (<anonymous>)
+    at Calendar (src\components\Calendar.tsx:75:15)
+  45 |
+  46 |   const getReservationsForDay = (day: number) => {
+> 47 |     return reservations.filter(res => {
+     |                         ^
+  48 |       const checkIn = new Date(res.checkIn)
+  49 |       const checkOut = new Date(res.checkOut)
+  50 |       const currentDay = new Date(year, month, day) {
+  digest: '512503070'
+}
+ GET /dashboard 500 in 604ms
+ GET /favicon.ico 200 in 17ms
+ ✓ Compiled in 703ms (930 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard 200 in 905ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 650ms (921 modules)
+ GET /dashboard 200 in 1039ms
+ ✓ Compiled in 426ms (935 modules)
+ GET /dashboard 200 in 146ms

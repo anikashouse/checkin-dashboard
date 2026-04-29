@@ -86,15 +86,18 @@ export default function Calendar({ reservations, year, month }: CalendarProps) {
                   <>
                     <div className="font-medium text-slate-900 mb-1">{day}</div>
                     <div className="space-y-1">
-                      {reservationsForDay.map((res, idx) => (
-                        <div
-                          key={res.id}
-                          className={`text-xs p-1 rounded border truncate ${getColorClass(idx)}`}
-                          title={`${res.guestName} - ${res.airbnbCode || 'N/A'}`}
-                        >
-                          {res.airbnbCode || res.guestName.split(' ')[0]}
-                        </div>
-                      ))}
+                      {reservationsForDay.map((res, idx) => {
+                        const displayName = res.airbnbCode || res.guestName?.split(' ')[0] || 'Guest'
+                        return (
+                          <div
+                            key={res.id}
+                            className={`text-xs p-1 rounded border truncate ${getColorClass(idx)}`}
+                            title={`${res.guestName || 'Guest'} - ${res.airbnbCode || 'N/A'}`}
+                          >
+                            {displayName}
+                          </div>
+                        )
+                      })}
                     </div>
                   </>
                 ) : (
