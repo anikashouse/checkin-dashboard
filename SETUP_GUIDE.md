@@ -246,7 +246,15 @@ NEXTAUTH_URL=https://yourdomain.com
 
 ```
 [  ] Part 1: User Setup (Manual guide)
-[  ] Part 2.1: Authentication
+[✓] Part 2.1: Authentication
+    - NextAuth configured with Google OAuth
+    - Users saved to Supabase on first login
+    - Middleware protects dashboard routes
+    - Session includes user_id
+    
+    Next: Run SQL migration in Supabase
+    File: sql/001_create_users_table.sql
+    
 [  ] Part 2.2: Multi-tenancy DB
 [  ] Part 2.3: API Endpoints
 [  ] Part 2.4: UI Components
