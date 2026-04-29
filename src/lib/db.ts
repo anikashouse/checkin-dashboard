@@ -96,7 +96,11 @@ function parseIcalText(text: string): Array<{
     const end = parseD(dtend)
     if (!start || !end) continue
 
-    if (summary.toLowerCase().includes('blocked') || summary.toLowerCase().includes('no disponible')) continue
+    // Filter out blocked/unavailable events
+    const summaryLower = summary.toLowerCase()
+    if (summaryLower.includes('blocked') || summaryLower.includes('no disponible') ||
+        summaryLower.includes('not available') || summaryLower.includes('unavailable') ||
+        summaryLower.includes('available') || summaryLower.includes('airbnb')) continue
 
     const urlField = get('URL')
     const descField = get('DESCRIPTION')
