@@ -62,13 +62,13 @@
 
 ## Part 2: Technical Implementation (Development)
 
-### Part 2.1: Authentication with NextAuth
-- [ ] [ ] Implement NextAuth sign-up flow
-- [ ] [ ] Implement NextAuth sign-in flow
-- [ ] [ ] Protect routes with session checks
-- [ ] [ ] Add logout functionality
-- [ ] [ ] Store user_id in session
-- [ ] [ ] Add login page at `/auth/signin`
+### Part 2.1: Authentication with NextAuth ✓
+- [x] Implement NextAuth sign-up flow
+- [x] Implement NextAuth sign-in flow
+- [x] Protect routes with session checks
+- [x] Add logout functionality
+- [x] Store user_id in session
+- [x] Add login page at `/auth/signin`
 
 **Files to create/modify:**
 ```
@@ -80,11 +80,11 @@ src/middleware.ts (NEW - protect routes)
 
 ---
 
-### Part 2.2: Multi-Tenancy - Database Schema
-- [ ] [ ] Update `properties` table to filter by `user_id`
-- [ ] [ ] Update `reservations` table (already has property_id)
-- [ ] [ ] Add RLS (Row Level Security) policies
-- [ ] [ ] Ensure all queries filter by user context
+### Part 2.2: Multi-Tenancy - Database Schema ✓
+- [x] Update `properties` table to filter by `user_id`
+- [x] Update `reservations` table (already has property_id)
+- [x] Add RLS (Row Level Security) policies
+- [x] Ensure all queries filter by user context
 
 **RLS Policies needed:**
 ```sql
@@ -95,11 +95,11 @@ src/middleware.ts (NEW - protect routes)
 
 ---
 
-### Part 2.3: Update API Endpoints
-- [ ] [ ] Get user from session in all endpoints
-- [ ] [ ] Filter properties by user_id
-- [ ] [ ] Filter reservations by user's properties
-- [ ] [ ] Prevent cross-user data access
+### Part 2.3: Update API Endpoints ✓
+- [x] Get user from session in all endpoints
+- [x] Filter properties by user_id
+- [x] Filter reservations by user's properties
+- [x] Prevent cross-user data access
 
 **Endpoints to update:**
 ```
@@ -111,31 +111,31 @@ PUT /admin/properties/{id} → verify ownership
 
 ---
 
-### Part 2.4: Update UI Components
-- [ ] [ ] Show user info in sidebar
-- [ ] [ ] Add sign-out button
-- [ ] [ ] Show only user's properties
-- [ ] [ ] Hide admin endpoints from regular users
-- [ ] [ ] Add role-based access control (RBAC)
+### Part 2.4: Update UI Components (partial)
+- [x] Show user info in sidebar
+- [x] Add sign-out button
+- [x] Show only user's properties
+- [ ] Hide admin endpoints from regular users
+- [ ] Add role-based access control (RBAC)
 
 ---
 
 ### Part 2.5: User Profile Page
-- [ ] [ ] Create `/dashboard/profile` page
-- [ ] [ ] Show user info (email, joined date, etc)
-- [ ] [ ] Allow change password
-- [ ] [ ] Show API key for integrations (future)
+- [ ] Create `/dashboard/profile` page
+- [ ] Show user info (email, joined date, etc)
+- [ ] Allow change password
+- [ ] Show API key for integrations (future)
 
 ---
 
 ## Part 3: Deployment
 
 ### Step 3.1: Environment Setup
-- [ ] [ ] Create `.env.production` file
-- [ ] [ ] Get Supabase keys from project settings
-- [ ] [ ] Configure OAuth providers (Google, GitHub, etc)
-- [ ] [ ] Set NEXTAUTH_SECRET (generate: `openssl rand -base64 32`)
-- [ ] [ ] Set NEXTAUTH_URL to production domain
+- [ ] Create `.env.production` file
+- [ ] Get Supabase keys from project settings
+- [ ] Configure OAuth providers (Google, GitHub, etc)
+- [ ] Set NEXTAUTH_SECRET (generate: `openssl rand -base64 32`)
+- [ ] Set NEXTAUTH_URL to production domain
 
 **Required env vars:**
 ```
@@ -148,12 +148,12 @@ NEXTAUTH_URL=https://yourdomain.com
 
 ---
 
-### Step 3.2: Database Initialization
-- [ ] [ ] Create Supabase project
-- [ ] [ ] Run migrations (create users, properties, reservations tables)
-- [ ] [ ] Setup RLS policies
-- [ ] [ ] Configure backups
-- [ ] [ ] Setup logging
+### Step 3.2: Database Initialization ✓
+- [x] Create Supabase project
+- [x] Run migrations (create users, properties, reservations tables)
+- [x] Setup RLS policies
+- [ ] Configure backups
+- [ ] Setup logging
 
 **Migrations needed:**
 ```sql
@@ -164,59 +164,59 @@ NEXTAUTH_URL=https://yourdomain.com
 
 ---
 
-### Step 3.3: Deploy to Vercel
-- [ ] [ ] Connect GitHub repo to Vercel
-- [ ] [ ] Add environment variables in Vercel dashboard
-- [ ] [ ] Configure build settings
-- [ ] [ ] Deploy preview environment first
-- [ ] [ ] Test thoroughly before production
+### Step 3.3: Deploy to Vercel ✓
+- [x] Connect GitHub repo to Vercel
+- [x] Add environment variables in Vercel dashboard
+- [x] Configure build settings
+- [x] Deploy preview environment first
+- [x] Test thoroughly before production
 
 ---
 
 ### Step 3.4: Domain & SSL
-- [ ] [ ] Configure custom domain in Vercel
-- [ ] [ ] SSL certificate (automatic with Vercel)
-- [ ] [ ] Update NEXTAUTH_URL to match domain
-- [ ] [ ] Test login on production domain
+- [ ] Configure custom domain in Vercel
+- [ ] SSL certificate (automatic with Vercel)
+- [ ] Update NEXTAUTH_URL to match domain
+- [ ] Test login on production domain
 
 ---
 
 ### Step 3.5: Monitoring & Backups
-- [ ] [ ] Setup Supabase backups
-- [ ] [ ] Configure error tracking (Sentry?)
-- [ ] [ ] Setup uptime monitoring
-- [ ] [ ] Create runbook for common issues
+- [ ] Setup Supabase backups
+- [ ] Configure error tracking (Sentry?)
+- [ ] Setup uptime monitoring
+- [ ] Create runbook for common issues
 
 ---
 
 ## Part 4: Additional Features
 
-### Part 4.1: Multi-Property Support
-- [ ] [ ] Users can add multiple properties
-- [ ] [ ] Dashboard shows all user's properties
-- [ ] [ ] Bulk operations (sync all, etc)
-- [ ] [ ] Property-specific settings
+### Part 4.1: Multi-Property Support (partial)
+- [x] Users can add multiple properties
+- [x] Dashboard shows all user's properties
+- [ ] Bulk operations (sync all, etc)
+- [ ] Property-specific settings
 
 ---
 
 ### Part 4.2: Team Management
-- [ ] [ ] Invite other users to manage properties
-- [ ] [ ] Role-based permissions (admin, manager, viewer)
-- [ ] [ ] Activity log of who did what
+- [ ] Invite other users to manage properties
+- [ ] Role-based permissions (admin, manager, viewer)
+- [ ] Activity log of who did what
 
 ---
 
 ### Part 4.3: API Keys for Integrations
-- [ ] [ ] Generate API keys per user
-- [ ] [ ] Allow external integrations
-- [ ] [ ] Rate limiting per key
+- [ ] Generate API keys per user
+- [ ] Allow external integrations
+- [ ] Rate limiting per key
 
 ---
 
 ### Part 4.4: Webhooks
-- [ ] [ ] Setup webhooks for real-time updates
-- [ ] [ ] Notify when new reservation arrives
-- [ ] [ ] Integration with Slack/Discord
+- [ ] Setup webhooks for real-time updates
+- [ ] Notify when new reservation arrives
+- [ ] Integration with Slack/Discord
 
 ---
 

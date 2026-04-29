@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase'
 import SidebarNav from '@/components/SidebarNav'
 import Calendar from '@/components/Calendar'
 
-export default async function PropertyPage({ params }: { params: { id: string } }) {
+export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
   const userName = session?.user?.name
@@ -15,10 +16,10 @@ export default async function PropertyPage({ params }: { params: { id: string } 
   const { data: properties } = await supabase.from('properties').select('*').eq('user_id', userId)
   if (!properties || properties.length === 0) redirect('/setup')
 
-  const property = properties.find(p => p.id === params.id)
+  const property = properties.find(p => p.id === id)
   if (!property) redirect('/dashboard')
 
-  const { data: reservations = [] } = await supabase.from('reservations').select('*').eq('property_id', params.id)
+  const { data: reservations = [] } = await supabase.from('reservations').select('*').eq('property_id', id)
 
   const now = new Date()
   const currentYear = now.getFullYear()
