@@ -32,7 +32,7 @@ export default function PropertiesSettings() {
   }
 
   async function handleUpdate() {
-    if (!editingId || !formData.name || !formData.icalUrl) {
+    if (!editingId || !formData.name || !formData.ical_url) {
       setMessage('Name and iCal URL are required')
       return
     }
@@ -57,7 +57,7 @@ export default function PropertiesSettings() {
   }
 
   async function handleCreate() {
-    if (!formData.id || !formData.name || !formData.icalUrl) {
+    if (!formData.id || !formData.name || !formData.ical_url) {
       setMessage('ID, name, and iCal URL are required')
       return
     }
@@ -166,8 +166,8 @@ export default function PropertiesSettings() {
             <div>
               <label className="block text-sm font-medium mb-1">iCal URL</label>
               <textarea
-                value={formData.icalUrl || ''}
-                onChange={e => setFormData({ ...formData, icalUrl: e.target.value })}
+                value={formData.ical_url || ''}
+                onChange={e => setFormData({ ...formData, ical_url: e.target.value })}
                 placeholder="https://www.airbnb.es/calendar/ical/..."
                 className="w-full px-3 py-2 border rounded font-mono text-sm"
                 rows={3}
@@ -178,8 +178,8 @@ export default function PropertiesSettings() {
               <label className="block text-sm font-medium mb-1">Mossos ID (optional)</label>
               <input
                 type="text"
-                value={formData.mossosId || ''}
-                onChange={e => setFormData({ ...formData, mossosId: e.target.value })}
+                value={formData.mossos_id || ''}
+                onChange={e => setFormData({ ...formData, mossos_id: e.target.value })}
                 placeholder="ID50044239"
                 className="w-full px-3 py-2 border rounded"
               />
@@ -235,8 +235,8 @@ export default function PropertiesSettings() {
                 <div>
                   <label className="block text-sm font-medium mb-1">iCal URL</label>
                   <textarea
-                    value={formData.icalUrl || ''}
-                    onChange={e => setFormData({ ...formData, icalUrl: e.target.value })}
+                    value={formData.ical_url || ''}
+                    onChange={e => setFormData({ ...formData, ical_url: e.target.value })}
                     className="w-full px-3 py-2 border rounded font-mono text-sm"
                     rows={3}
                   />
@@ -246,8 +246,8 @@ export default function PropertiesSettings() {
                   <label className="block text-sm font-medium mb-1">Mossos ID</label>
                   <input
                     type="text"
-                    value={formData.mossosId || ''}
-                    onChange={e => setFormData({ ...formData, mossosId: e.target.value })}
+                    value={formData.mossos_id || ''}
+                    onChange={e => setFormData({ ...formData, mossos_id: e.target.value })}
                     className="w-full px-3 py-2 border rounded"
                   />
                 </div>
@@ -289,13 +289,13 @@ export default function PropertiesSettings() {
                   <div>
                     <span className="font-medium">iCal URL:</span>
                     <div className="text-gray-600 break-all font-mono text-xs">
-                      {prop.icalUrl?.substring(0, 100)}...
+                      {prop.ical_url?.substring(0, 100)}...
                     </div>
                   </div>
-                  {prop.mossosId && (
+                  {prop.mossos_id && (
                     <div>
                       <span className="font-medium">Mossos ID:</span>
-                      <span className="ml-2 text-gray-600">{prop.mossosId}</span>
+                      <span className="ml-2 text-gray-600">{prop.mossos_id}</span>
                     </div>
                   )}
                 </div>

@@ -4,11 +4,11 @@ import { supabase } from '@/lib/supabase'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, icalUrl, mossosId, coverColor } = body
+    const { id, name, ical_url, mossos_id, coverColor } = body
 
-    if (!id || !name || !icalUrl) {
+    if (!id || !name || !ical_url) {
       return NextResponse.json(
-        { error: 'id, name, and icalUrl are required' },
+        { error: 'id, name, and ical_url are required' },
         { status: 400 }
       )
     }
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
     const { error } = await supabase.from('properties').insert({
       id,
       name,
-      ical_url: icalUrl,
-      mossos_id: mossosId || null,
+      ical_url: ical_url,
+      mossos_id: mossos_id || null,
       cover_color: coverColor || '#EC4899',
       user_id: 'system' // TODO: get from session
     })

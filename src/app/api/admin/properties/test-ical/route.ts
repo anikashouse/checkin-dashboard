@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { parseIcalText } from '@/lib/db'
 
-async function fetchIcal(icalUrl: string): Promise<string | null> {
+async function fetchIcal(ical_url: string): Promise<string | null> {
   try {
-    const res = await fetch(icalUrl, {
+    const res = await fetch(ical_url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         propertyId,
         error: 'Error parsing iCal: ' + (err instanceof Error ? err.message : 'Unknown'),
-        icalUrl: prop.ical_url?.substring(0, 80) + '...'
+        ical_url: prop.ical_url?.substring(0, 80) + '...'
       })
     }
 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       propertyId,
       success: true,
       name: prop.name,
-      icalUrl: prop.ical_url?.substring(0, 80) + '...',
+      ical_url: prop.ical_url?.substring(0, 80) + '...',
       reservationCount: events.length,
       reservations: events.slice(0, 5).map(e => ({
         code: e.airbnbCode,

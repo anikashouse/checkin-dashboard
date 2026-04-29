@@ -9,8 +9,8 @@ function rowToProperty(row: any): Property {
     name:       row.name,
     address:    row.address,
     city:       row.city,
-    mossosId:   row.mossos_id,
-    icalUrl:    row.ical_url,
+    mossos_id:   row.mossos_id,
+    ical_url:    row.ical_url,
     coverColor: row.cover_color,
   }
 }
@@ -144,9 +144,9 @@ export function parseIcalText(text: string): Array<{
   return events
 }
 
-async function fetchIcal(icalUrl: string): Promise<string | null> {
+async function fetchIcal(ical_url: string): Promise<string | null> {
   try {
-    const res = await fetch(icalUrl, {
+    const res = await fetch(ical_url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
@@ -180,11 +180,11 @@ export async function syncReservationsFromIcals(): Promise<void> {
 
     let hasIcalUrls = false
     for (const prop of properties) {
-      console.log(`[iCal Sync] Checking ${prop.name}:`, prop.icalUrl ? 'has iCal' : 'NO iCal URL')
-      if (!prop.icalUrl) continue
+      console.log(`[iCal Sync] Checking ${prop.name}:`, prop.ical_url ? 'has iCal' : 'NO iCal URL')
+      if (!prop.ical_url) continue
 
       hasIcalUrls = true
-      const icalText = await fetchIcal(prop.icalUrl)
+      const icalText = await fetchIcal(prop.ical_url)
       if (!icalText) {
         console.warn(`Failed to fetch iCal for ${prop.name}`)
         continue

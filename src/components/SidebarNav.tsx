@@ -27,7 +27,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.coverColor }} />
+            <span className="w-2 h-2 rounded-full shrink-0 bg-blue-500" />
             <span className="text-sm truncate">{p.name}</span>
           </Link>
         )

@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { parseIcalText } from '@/lib/db'
 
-async function fetchIcal(icalUrl: string): Promise<string | null> {
+async function fetchIcal(ical_url: string): Promise<string | null> {
   try {
-    const res = await fetch(icalUrl, {
+    const res = await fetch(ical_url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },

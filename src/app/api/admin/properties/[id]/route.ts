@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const body = await request.json()
-    const { id } = params
+    const { id } = await params
 
     const { error } = await supabase
       .from('properties')
       .update({
         name: body.name,
-        ical_url: body.icalUrl,
-        mossos_id: body.mossosId,
+        ical_url: body.ical_url,
+        mossos_id: body.mossos_id,
       })
       .eq('id', id)
 

@@ -8,7 +8,7 @@ export async function GET() {
       properties: properties.map(p => ({
         id: p.id,
         name: p.name,
-        icalUrl: p.icalUrl,
+        ical_url: p.ical_url,
       }))
     })
   } catch (err) {

@@ -4,9 +4,15 @@ import { supabase } from '@/lib/supabase'
 export async function GET() {
   try {
     // Get table info from information_schema
-    const { data, error } = await supabase.rpc('get_table_constraints', {
-      table_name: 'checkin_records'
-    }).catch(() => null)
+    let data = null
+    try {
+      const result = await supabase.rpc('get_table_constraints', {
+        table_name: 'checkin_records'
+      })
+      data = result.data
+    } catch {
+      // Ignore errors
+    }
 
     // Alternative: just try to get a sample record to see structure
     const { data: sample } = await supabase
