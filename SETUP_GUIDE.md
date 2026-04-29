@@ -252,10 +252,13 @@ NEXTAUTH_URL=https://yourdomain.com
     - Middleware protects dashboard routes
     - Session includes user_id
     
-    Next: Run SQL migration in Supabase
-    File: sql/001_create_users_table.sql
+[✓] Part 2.2: Multi-tenancy DB
+    - users table created with RLS
+    - user_id column added to properties
+    - RLS policies configured for both tables
+    - Each user can only see their own data
     
-[  ] Part 2.2: Multi-tenancy DB
+    Next: Update API endpoints to filter by user_id
 [  ] Part 2.3: API Endpoints
 [  ] Part 2.4: UI Components
 [  ] Part 2.5: User Profile
