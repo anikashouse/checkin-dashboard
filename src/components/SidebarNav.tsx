@@ -11,7 +11,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
   return (
     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 mb-3">
+      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 mb-3">
         Propiedades
       </p>
       {properties.map(p => {
@@ -21,25 +21,25 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
           <Link
             key={p.id}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
               active
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-slate-700 text-white'
+                : 'text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
-            <span className="w-2 h-2 rounded-full shrink-0 bg-blue-500" />
+            <span className="w-2 h-2 rounded-full shrink-0 bg-blue-400" />
             <span className="text-sm truncate">{p.name}</span>
           </Link>
         )
       })}
 
-      <div className="pt-4 mt-4 border-t border-slate-800 space-y-1">
+      <div className="pt-4 mt-4 border-t border-slate-700 space-y-1">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
             pathname === '/dashboard'
-              ? 'bg-slate-800 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-slate-700 text-white'
+              : 'text-slate-300 hover:text-white hover:bg-slate-700'
           }`}
         >
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,10 +50,10 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
         <Link
           href="/dashboard/settings/properties"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
             isActive('/dashboard/settings/properties')
-              ? 'bg-slate-800 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-slate-700 text-white'
+              : 'text-slate-300 hover:text-white hover:bg-slate-700'
           }`}
         >
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
