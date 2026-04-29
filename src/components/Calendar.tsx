@@ -30,7 +30,11 @@ export default function Calendar({ reservations, year, month }: CalendarProps) {
 
   const totalDays = daysInMonth(year, month)
   const firstDay = firstDayOfMonth(year, month)
-  const calendarDays = Array(firstDay).fill(null).concat(Array.from({ length: totalDays }, (_, i) => i + 1))
+  const dayArray = Array.from({ length: totalDays }, (_, i) => i + 1)
+  const leadingNulls = Array(firstDay).fill(null)
+  const totalCells = Math.ceil((firstDay + totalDays) / 7) * 7
+  const trailingNulls = Array(totalCells - firstDay - totalDays).fill(null)
+  const calendarDays = leadingNulls.concat(dayArray).concat(trailingNulls)
 
   // Get reservations that overlap with this month
   const monthStart = new Date(year, month, 1)
@@ -81,17 +85,13 @@ export default function Calendar({ reservations, year, month }: CalendarProps) {
       </h2>
 
       <div className="border border-gray-300 rounded-lg overflow-hidden">
-        {/* Header with day numbers */}
+        {/* Header with day names */}
         <div className="grid grid-cols-7 gap-0 bg-gray-50 border-b border-gray-300">
-          {Array.from({ length: 7 }, (_, i) => {
-            const dayNum = i + 1 - firstDay
-            const isValidDay = dayNum >= 1 && dayNum <= totalDays
-            return (
-              <div key={i} className="border-r border-gray-300 p-4 text-center font-bold text-slate-700 text-lg h-16 flex items-start justify-start">
-                {isValidDay ? dayNum : ''}
-              </div>
-            )
-          })}
+          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
+            <div key={day} className="border-r border-gray-300 p-3 text-center font-bold text-slate-700 text-sm h-12 flex items-center justify-center">
+              {day}
+            </div>
+          ))}
         </div>
 
         {/* Calendar grid */}
