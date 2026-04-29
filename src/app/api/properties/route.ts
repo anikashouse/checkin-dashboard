@@ -6,8 +6,9 @@ import { supabase } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
+    const sessionUserId = session?.user?.id
 
-    if (!session?.user?.id) {
+    if (!sessionUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (userId !== session.user.id) {
+    if (userId !== sessionUserId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
