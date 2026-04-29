@@ -8,6 +8,7 @@ export default function PropertiesSettings() {
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [creatingNew, setCreatingNew] = useState(false)
   const [formData, setFormData] = useState<Partial<Property>>({})
   const [testingId, setTestingId] = useState<string | null>(null)
   const [testResult, setTestResult] = useState<any>(null)
@@ -52,6 +53,33 @@ export default function PropertiesSettings() {
       }
     } catch (e) {
       setMessage('Error updating property')
+    }
+  }
+
+  async function handleCreate() {
+    if (!formData.id || !formData.name || !formData.icalUrl) {
+      setMessage('ID, name, and iCal URL are required')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/admin/properties/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('Property created successfully')
+        setCreatingNew(false)
+        setFormData({})
+        await loadProperties()
+      } else {
+        setMessage(data.error || 'Error creating property')
+      }
+    } catch (e) {
+      setMessage('Error creating property')
     }
   }
 
@@ -106,6 +134,85 @@ export default function PropertiesSettings() {
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-blue-700">
           {message}
         </div>
+      )}
+
+      {creatingNew && (
+        <div className="mb-6 border rounded-lg p-6 bg-white shadow-sm">
+          <h2 className="text-xl font-bold mb-4">Add New Property</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Property ID (e.g. p3)</label>
+              <input
+                type="text"
+                value={formData.id || ''}
+                onChange={e => setFormData({ ...formData, id: e.target.value })}
+                placeholder="p3"
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Property Name</label>
+              <input
+                type="text"
+                value={formData.name || ''}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Cama doble 12 min S. Familia"
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">iCal URL</label>
+              <textarea
+                value={formData.icalUrl || ''}
+                onChange={e => setFormData({ ...formData, icalUrl: e.target.value })}
+                placeholder="https://www.airbnb.es/calendar/ical/..."
+                className="w-full px-3 py-2 border rounded font-mono text-sm"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Mossos ID (optional)</label>
+              <input
+                type="text"
+                value={formData.mossosId || ''}
+                onChange={e => setFormData({ ...formData, mossosId: e.target.value })}
+                placeholder="ID50044239"
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreate}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Create Property
+              </button>
+              <button
+                onClick={() => {
+                  setCreatingNew(false)
+                  setFormData({})
+                }}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!creatingNew && (
+        <button
+          onClick={() => setCreatingNew(true)}
+          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          + Add Property
+        </button>
       )}
 
       <div className="space-y-6">
