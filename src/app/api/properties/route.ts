@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('properties')
       .insert({
-        userId,
+        user_id: userId,
         name,
         address: address || null,
         city: city || null,

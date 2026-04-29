@@ -15,7 +15,7 @@ export default async function Dashboard() {
   const { data: properties } = await supabase
     .from('properties')
     .select('*')
-    .eq('userId', userId)
+    .eq('user_id', userId)
 
   if (!properties || properties.length === 0) {
     redirect('/setup')
