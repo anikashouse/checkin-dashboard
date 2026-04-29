@@ -24,10 +24,11 @@ export default async function Dashboard() {
     redirect('/setup')
   }
 
+  const propertyIds = properties.map(p => p.id)
   const { data: reservations = [] } = await supabase
     .from('reservations')
     .select('*')
-    .in('propertyId', properties.map(p => p.id))
+    .in('property_id', propertyIds)
 
   const now = new Date()
   const currentYear = now.getFullYear()

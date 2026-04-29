@@ -25,3 +25,31 @@
  GET /favicon.ico 200 in 20ms
  ✓ Compiled in 309ms (244 modules)
  GET /dashboard 200 in 181ms
+ ✓ Compiled in 459ms (910 modules)
+ GET /dashboard 200 in 363ms
+ ✓ Compiled in 304ms (910 modules)
+ ✓ Compiled in 345ms (913 modules)
+ GET /dashboard 200 in 428ms
+ GET /dashboard 200 in 9896ms
+ ✓ Compiled in 351ms (913 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ TypeError: Cannot read properties of null (reading 'filter')
+    at getReservationsForDay (src\components\Calendar.tsx:47:25)
+    at eval (src\components\Calendar.tsx:77:46)
+    at Array.map (<anonymous>)
+    at eval (src\components\Calendar.tsx:76:16)
+    at Array.map (<anonymous>)
+    at Calendar (src\components\Calendar.tsx:75:15)
+  45 |
+  46 |   const getReservationsForDay = (day: number) => {
+> 47 |     return reservations.filter(res => {
+     |                         ^
+  48 |       const checkIn = new Date(res.checkIn)
+  49 |       const checkOut = new Date(res.checkOut)
+  50 |       const currentDay = new Date(year, month, day) {
+  digest: '512503070'
+}
+ GET /dashboard 500 in 770ms
+ ✓ Compiled /favicon.ico in 428ms (685 modules)
+ GET /favicon.ico 200 in 585ms
+ GET /favicon.ico 200 in 13ms

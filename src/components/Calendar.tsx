@@ -44,6 +44,7 @@ export default function Calendar({ reservations, year, month }: CalendarProps) {
   }, [year, month])
 
   const getReservationsForDay = (day: number) => {
+    if (!reservations || !Array.isArray(reservations)) return []
     return reservations.filter(res => {
       const checkIn = new Date(res.checkIn)
       const checkOut = new Date(res.checkOut)
