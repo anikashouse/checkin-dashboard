@@ -9,104 +9,126 @@ interface CalendarProps {
   month: number
 }
 
-const COLORS = [
-  'bg-yellow-100 border-yellow-300 text-yellow-900',
-  'bg-blue-100 border-blue-300 text-blue-900',
-  'bg-green-100 border-green-300 text-green-900',
-  'bg-pink-100 border-pink-300 text-pink-900',
-  'bg-purple-100 border-purple-300 text-purple-900',
-]
+const COLORS = {
+  yellow: 'bg-yellow-100 border-yellow-300',
+  blue: 'bg-blue-100 border-blue-300',
+  green: 'bg-green-100 border-green-300',
+  pink: 'bg-pink-100 border-pink-300',
+  purple: 'bg-purple-100 border-purple-300',
+}
+
+const colorArray = Object.values(COLORS)
 
 export default function Calendar({ reservations, year, month }: CalendarProps) {
   const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate()
   const firstDayOfMonth = (y: number, m: number) => new Date(y, m, 1).getDay()
-
-  const days = useMemo(() => {
-    const totalDays = daysInMonth(year, month)
-    const firstDay = firstDayOfMonth(year, month)
-    const weeks: (number | null)[][] = []
-    let week: (number | null)[] = Array(firstDay).fill(null)
-
-    for (let day = 1; day <= totalDays; day++) {
-      week.push(day)
-      if (week.length === 7) {
-        weeks.push(week)
-        week = []
-      }
-    }
-
-    if (week.length > 0) {
-      while (week.length < 7) week.push(null)
-      weeks.push(week)
-    }
-
-    return weeks
-  }, [year, month])
-
-  const getReservationsForDay = (day: number) => {
-    if (!reservations || !Array.isArray(reservations)) return []
-    return reservations.filter(res => {
-      const checkIn = new Date(res.checkIn)
-      const checkOut = new Date(res.checkOut)
-      const currentDay = new Date(year, month, day)
-      return currentDay >= checkIn && currentDay < checkOut
-    })
-  }
-
-  const getColorClass = (index: number) => COLORS[index % COLORS.length]
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ]
 
+  const totalDays = daysInMonth(year, month)
+  const firstDay = firstDayOfMonth(year, month)
+  const calendarDays = Array(firstDay).fill(null).concat(Array.from({ length: totalDays }, (_, i) => i + 1))
+
+  // Get reservations that overlap with this month
+  const monthStart = new Date(year, month, 1)
+  const monthEnd = new Date(year, month + 1, 0)
+
+  const relevantReservations = useMemo(() => {
+    if (!reservations || !Array.isArray(reservations)) return []
+    return reservations.filter(res => {
+      const checkOut = new Date(res.checkOut)
+      const checkIn = new Date(res.checkIn)
+      return checkOut > monthStart && checkIn <= monthEnd
+    })
+  }, [reservations, year, month])
+
+  const getReservationColor = (index: number) => colorArray[index % colorArray.length]
+
+  // Create a map of day -> reservations for that day
+  const dayReservations = useMemo(() => {
+    const map: Record<number, Array<{ res: Reservation; colorClass: string; index: number }>> = {}
+
+    relevantReservations.forEach((res, resIndex) => {
+      const checkIn = new Date(res.checkIn)
+      const checkOut = new Date(res.checkOut)
+
+      // Find all days this reservation spans in the current month
+      let currentDate = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
+      currentDate.setHours(0, 0, 0, 0)
+
+      while (currentDate < checkOut && currentDate <= monthEnd) {
+        const dayOfMonth = currentDate.getDate()
+        if (!map[dayOfMonth]) map[dayOfMonth] = []
+        map[dayOfMonth].push({
+          res,
+          colorClass: getReservationColor(resIndex),
+          index: resIndex
+        })
+        currentDate.setDate(currentDate.getDate() + 1)
+      }
+    })
+
+    return map
+  }, [relevantReservations, year, month])
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-6">
+      <h2 className="text-2xl font-bold text-slate-900 mb-6">
         {monthNames[month]} De {year}
       </h2>
 
-      <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 rounded">
-        {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab'].map(day => (
-          <div key={day} className="bg-gray-50 p-2 text-center font-medium text-sm text-slate-600">
-            {day}
-          </div>
-        ))}
-
-        {days.map((week, weekIdx) =>
-          week.map((day, dayIdx) => {
-            const reservationsForDay = day ? getReservationsForDay(day) : []
-
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        {/* Header with day numbers */}
+        <div className="grid grid-cols-7 gap-0 bg-gray-50 border-b border-gray-300">
+          {Array.from({ length: 7 }, (_, i) => {
+            const dayNum = i + 1 - firstDay
+            const isValidDay = dayNum >= 1 && dayNum <= totalDays
             return (
-              <div
-                key={`${weekIdx}-${dayIdx}`}
-                className="bg-white p-2 min-h-24 border border-gray-200 text-sm"
-              >
-                {day ? (
-                  <>
-                    <div className="font-medium text-slate-900 mb-1">{day}</div>
-                    <div className="space-y-1">
-                      {reservationsForDay.map((res, idx) => {
-                        const displayName = res.airbnbCode || res.guestName?.split(' ')[0] || 'Guest'
-                        return (
-                          <div
-                            key={res.id}
-                            className={`text-xs p-1 rounded border truncate ${getColorClass(idx)}`}
-                            title={`${res.guestName || 'Guest'} - ${res.airbnbCode || 'N/A'}`}
-                          >
-                            {displayName}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <div className="bg-gray-50" />
-                )}
+              <div key={i} className="border-r border-gray-300 p-4 text-center font-bold text-slate-700 text-lg h-16 flex items-start justify-start">
+                {isValidDay ? dayNum : ''}
               </div>
             )
-          })
-        )}
+          })}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-0 bg-white">
+          {calendarDays.map((day, idx) => (
+            <div
+              key={idx}
+              className="border-r border-b border-gray-300 p-3 min-h-40"
+              style={{
+                borderRight: idx % 7 === 6 ? 'none' : undefined,
+              }}
+            >
+              {day ? (
+                <div className="h-full">
+                  <div className="font-bold text-slate-700 mb-2 text-sm">{day}</div>
+                  <div className="space-y-1">
+                    {dayReservations[day]?.map((item, resIdx) => (
+                      <div
+                        key={`${item.res.id}-${resIdx}`}
+                        className={`text-xs p-2 rounded border ${item.colorClass} border-l-4`}
+                      >
+                        <div className="font-medium text-slate-900 truncate">
+                          {item.res.airbnbCode || item.res.guestName?.split(' ')[0] || 'Guest'}
+                        </div>
+                        {item.res.guestName && item.res.airbnbCode && (
+                          <div className="text-xs text-slate-600 truncate mt-0.5">
+                            {item.res.guestName}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
