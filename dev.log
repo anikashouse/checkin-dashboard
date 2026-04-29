@@ -1,0 +1,27 @@
+
+> checkin-dashboard@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use by process 31448, using available port 3003 instead.
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3003
+   - Network:      http://169.254.100.224:3003
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.3s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 876ms (216 modules)
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 4.2s (928 modules)
+ GET /dashboard 200 in 5424ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 648ms (683 modules)
+ GET /favicon.ico 200 in 828ms
+ GET /dashboard 200 in 503ms
+ GET /favicon.ico 200 in 31ms
+ GET /dashboard 200 in 183ms
+ GET /dashboard 200 in 249ms
+ GET /favicon.ico 200 in 20ms
+ ✓ Compiled in 309ms (244 modules)
+ GET /dashboard 200 in 181ms

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import SidebarNav from '@/components/SidebarNav'
+import Calendar from '@/components/Calendar'
 import Link from 'next/link'
 
 export default async function Dashboard() {
@@ -22,6 +23,15 @@ export default async function Dashboard() {
   if (!properties || properties.length === 0) {
     redirect('/setup')
   }
+
+  const { data: reservations = [] } = await supabase
+    .from('reservations')
+    .select('*')
+    .in('propertyId', properties.map(p => p.id))
+
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth()
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -59,26 +69,41 @@ export default async function Dashboard() {
             <p className="text-slate-500">Todo al día</p>
           </div>
 
-          {/* Calendar placeholder */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-slate-900">Abril De 2026</h2>
-              <div className="flex gap-2">
-                <button className="px-4 py-1.5 bg-orange-500 text-white rounded text-sm font-medium hover:bg-orange-600">Mes</button>
-                <button className="px-4 py-1.5 bg-gray-100 text-slate-900 rounded text-sm font-medium hover:bg-gray-200">Semana</button>
-              </div>
-            </div>
-            <div className="aspect-video bg-gray-50 rounded flex items-center justify-center text-gray-400">
-              Calendar view coming soon
-            </div>
+          {/* Calendar */}
+          <div className="mb-6">
+            <Calendar
+              reservations={reservations as any}
+              year={currentYear}
+              month={currentMonth}
+            />
           </div>
 
           {/* Reservation Summary */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-bold text-slate-900 mb-4">RESUMEN DE RESERVAS</h2>
-            <div className="text-slate-500">
-              No reservations to display
-            </div>
+            {reservations && reservations.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-slate-600">Total de reservas: <span className="font-bold">{reservations.length}</span></p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-blue-50 rounded border border-blue-200">
+                    <p className="text-sm text-slate-600">Próximas reservas</p>
+                    <p className="text-xl font-bold text-blue-900">
+                      {reservations.filter(r => new Date(r.checkIn) > now).length}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded border border-green-200">
+                    <p className="text-sm text-slate-600">Huéspedes activos</p>
+                    <p className="text-xl font-bold text-green-900">
+                      {reservations.filter(r => new Date(r.checkIn) <= now && new Date(r.checkOut) > now).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-slate-500">
+                No reservations to display
+              </div>
+            )}
           </div>
         </div>
       </div>
