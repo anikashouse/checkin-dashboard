@@ -119,209 +119,115 @@ export default function PropertiesSettings() {
     }
   }
 
-  if (loading) return <div className="p-6">Cargando...</div>
+  if (loading) return (
+    <div className="p-8 text-slate-500">Cargando...</div>
+  )
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Property Settings</h1>
-        <Link href="/dashboard" className="text-blue-600 hover:underline">
-          Back to Dashboard
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Propiedades</h1>
+        <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-700">
+          ← Volver al resumen
         </Link>
       </div>
 
       {message && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-blue-700">
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
           {message}
         </div>
       )}
 
       {creatingNew && (
-        <div className="mb-6 border rounded-lg p-6 bg-white shadow-sm">
-          <h2 className="text-xl font-bold mb-4">Add New Property</h2>
-
+        <div className="mb-6 border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Nueva propiedad</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Property ID (e.g. p3)</label>
-              <input
-                type="text"
-                value={formData.id || ''}
-                onChange={e => setFormData({ ...formData, id: e.target.value })}
-                placeholder="p3"
-                className="w-full px-3 py-2 border rounded"
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-1">ID (ej. p3)</label>
+              <input type="text" value={formData.id || ''} onChange={e => setFormData({ ...formData, id: e.target.value })} placeholder="p3" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-1">Property Name</label>
-              <input
-                type="text"
-                value={formData.name || ''}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Cama doble 12 min S. Familia"
-                className="w-full px-3 py-2 border rounded"
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+              <input type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Cama doble 12 min S. Familia" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-1">iCal URL</label>
-              <textarea
-                value={formData.ical_url || ''}
-                onChange={e => setFormData({ ...formData, ical_url: e.target.value })}
-                placeholder="https://www.airbnb.es/calendar/ical/..."
-                className="w-full px-3 py-2 border rounded font-mono text-sm"
-                rows={3}
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-1">iCal URL</label>
+              <textarea value={formData.ical_url || ''} onChange={e => setFormData({ ...formData, ical_url: e.target.value })} placeholder="https://www.airbnb.es/calendar/ical/..." className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-400" rows={3} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-1">Mossos ID (optional)</label>
-              <input
-                type="text"
-                value={formData.mossos_id || ''}
-                onChange={e => setFormData({ ...formData, mossos_id: e.target.value })}
-                placeholder="ID50044239"
-                className="w-full px-3 py-2 border rounded"
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Mossos ID (opcional)</label>
+              <input type="text" value={formData.mossos_id || ''} onChange={e => setFormData({ ...formData, mossos_id: e.target.value })} placeholder="ID50044239" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
             </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreate}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Create Property
-              </button>
-              <button
-                onClick={() => {
-                  setCreatingNew(false)
-                  setFormData({})
-                }}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+            <div className="flex gap-2 pt-2">
+              <button onClick={handleCreate} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">Crear propiedad</button>
+              <button onClick={() => { setCreatingNew(false); setFormData({}) }} className="px-4 py-2 bg-gray-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-gray-200">Cancelar</button>
             </div>
           </div>
         </div>
       )}
 
       {!creatingNew && (
-        <button
-          onClick={() => setCreatingNew(true)}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          + Add Property
+        <button onClick={() => setCreatingNew(true)} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">
+          + Añadir propiedad
         </button>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {properties.map(prop => (
-          <div key={prop.id} className="border rounded-lg p-6 bg-white shadow-sm">
+          <div key={prop.id} className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
             {editingId === prop.id ? (
               <div className="space-y-4">
-                <h2 className="text-xl font-bold mb-4">Edit {prop.id}</h2>
-
+                <h2 className="text-lg font-bold text-slate-900">Editar {prop.name}</h2>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Property Name</label>
-                  <input
-                    type="text"
-                    value={formData.name || ''}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+                  <input type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-1">iCal URL</label>
-                  <textarea
-                    value={formData.ical_url || ''}
-                    onChange={e => setFormData({ ...formData, ical_url: e.target.value })}
-                    className="w-full px-3 py-2 border rounded font-mono text-sm"
-                    rows={3}
-                  />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">iCal URL</label>
+                  <textarea value={formData.ical_url || ''} onChange={e => setFormData({ ...formData, ical_url: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-400" rows={3} />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-1">Mossos ID</label>
-                  <input
-                    type="text"
-                    value={formData.mossos_id || ''}
-                    onChange={e => setFormData({ ...formData, mossos_id: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Mossos ID</label>
+                  <input type="text" value={formData.mossos_id || ''} onChange={e => setFormData({ ...formData, mossos_id: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleUpdate}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex gap-2 pt-2">
+                  <button onClick={handleUpdate} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">Guardar</button>
+                  <button onClick={() => setEditingId(null)} className="px-4 py-2 bg-gray-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-gray-200">Cancelar</button>
                 </div>
               </div>
             ) : (
               <div>
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h2 className="text-xl font-bold">{prop.id}</h2>
-                    <p className="text-gray-600">{prop.name}</p>
+                    <h2 className="font-bold text-slate-900">{prop.name}</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">{prop.id}</p>
                   </div>
-                  <button
-                    onClick={() => {
-                      setEditingId(prop.id)
-                      setFormData(prop)
-                    }}
-                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    Edit
-                  </button>
+                  <button onClick={() => { setEditingId(prop.id); setFormData(prop) }} className="px-3 py-1 text-sm bg-gray-100 text-slate-700 rounded-lg hover:bg-gray-200">Editar</button>
                 </div>
-
-                <div className="space-y-2 text-sm mb-4">
+                <div className="space-y-1.5 text-sm mb-4">
                   <div>
-                    <span className="font-medium">iCal URL:</span>
-                    <div className="text-gray-600 break-all font-mono text-xs">
-                      {prop.ical_url?.substring(0, 100)}...
-                    </div>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">iCal URL</span>
+                    <div className="text-slate-600 font-mono text-xs mt-0.5 truncate">{prop.ical_url?.substring(0, 80)}...</div>
                   </div>
                   {prop.mossos_id && (
                     <div>
-                      <span className="font-medium">Mossos ID:</span>
-                      <span className="ml-2 text-gray-600">{prop.mossos_id}</span>
+                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mossos ID</span>
+                      <span className="ml-2 text-slate-700 text-sm">{prop.mossos_id}</span>
                     </div>
                   )}
                 </div>
-
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => testIcal(prop.id)}
-                    disabled={testingId === prop.id}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:bg-gray-200"
-                  >
-                    {testingId === prop.id ? 'Testing...' : 'Test iCal'}
+                  <button onClick={() => testIcal(prop.id)} disabled={testingId === prop.id} className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-medium hover:bg-blue-100 disabled:opacity-50">
+                    {testingId === prop.id ? 'Probando...' : 'Test iCal'}
                   </button>
-                  <button
-                    onClick={() => syncProperty(prop.id)}
-                    className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-                  >
+                  <button onClick={() => syncProperty(prop.id)} className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-medium hover:bg-green-100">
                     Sync Now
                   </button>
                 </div>
-
                 {testResult && testResult.propertyId === prop.id && (
-                  <div className="mt-4 p-3 bg-gray-100 rounded text-sm">
-                    <p className="font-medium mb-2">Test Result:</p>
-                    <pre className="text-xs overflow-auto max-h-48">
-                      {JSON.stringify(testResult, null, 2)}
-                    </pre>
+                  <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                    <p className="font-medium text-slate-700 mb-2">Resultado:</p>
+                    <pre className="text-xs text-slate-600 overflow-auto max-h-48">{JSON.stringify(testResult, null, 2)}</pre>
                   </div>
                 )}
               </div>
