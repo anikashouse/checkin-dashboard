@@ -85,12 +85,12 @@ export default async function Dashboard() {
             <div className="mb-8">
               <h2 className="text-lg font-bold text-slate-900 mb-4">PROPIEDADES</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {properties.slice(0, 2).map((property, idx) => (
+                {properties.slice(0, 2).reverse().map((property, idx) => (
                   <PropertyCard
                     key={property.id}
                     property={property}
                     reservations={reservations as any}
-                    index={idx}
+                    index={1 - idx}
                   />
                 ))}
               </div>

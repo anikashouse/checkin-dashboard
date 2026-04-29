@@ -10,7 +10,7 @@ const PROPERTY_ICONS = ['🏡', '🏠', '🏘️', '🏢', '🏗️']
 
 export default function PropertyCard({ property, reservations, index }: PropertyCardProps) {
   const icon = PROPERTY_ICONS[index % PROPERTY_ICONS.length]
-  const propertyReservations = reservations.filter(r => r.propertyId === property.id)
+  const propertyReservations = reservations.filter(r => (r as any).property_id === property.id)
 
   const now = new Date()
   const nextReservation = propertyReservations
