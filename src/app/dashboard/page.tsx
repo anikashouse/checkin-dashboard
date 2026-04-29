@@ -5,15 +5,16 @@ import { supabase } from '@/lib/supabase'
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect('/auth/signin')
   }
 
   const { data: properties } = await supabase
     .from('properties')
     .select('*')
-    .eq('userId', session.user.id)
+    .eq('userId', userId)
 
   if (!properties || properties.length === 0) {
     redirect('/setup')

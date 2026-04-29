@@ -5,8 +5,9 @@ import { SetupForm } from './form'
 
 export default async function SetupPage() {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect('/auth/signin')
   }
 
@@ -19,7 +20,7 @@ export default async function SetupPage() {
             <p className="text-slate-600 mt-2">Configura tu primera propiedad para empezar</p>
           </div>
 
-          <SetupForm userId={session.user.id} />
+          <SetupForm userId={userId} />
         </div>
       </div>
     </div>
