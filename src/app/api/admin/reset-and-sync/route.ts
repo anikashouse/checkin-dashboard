@@ -63,10 +63,17 @@ export async function POST() {
     })
   } catch (err) {
     console.error('[Reset and Sync] Error:', err)
+    const errorMessage = err instanceof Error ? err.message : JSON.stringify(err)
+    console.error('[Reset and Sync] Full error:', errorMessage)
     return NextResponse.json(
       {
         success: false,
-        error: err instanceof Error ? err.message : 'Unknown error'
+        error: errorMessage,
+        details: err instanceof Error ? {
+          name: err.name,
+          message: err.message,
+          stack: err.stack
+        } : err
       },
       { status: 500 }
     )
