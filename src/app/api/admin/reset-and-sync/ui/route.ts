@@ -6,6 +6,7 @@ export async function GET() {
 <html>
 <head>
   <title>Reset and Sync</title>
+  <meta charset="UTF-8">
   <style>
     body { font-family: Arial; max-width: 700px; margin: 40px auto; padding: 20px; }
     h1 { color: #d9534f; }
@@ -22,22 +23,22 @@ export async function GET() {
   </style>
 </head>
 <body>
-  <h1>⚠️ Reset and Sync</h1>
+  <h1>Reset and Sync</h1>
 
   <div class="danger">
-    🗑️ ADVERTENCIA: Esto eliminará TODAS las reservas de la base de datos<br>
-    Luego re-sincronizará desde los iCals
+    ADVERTENCIA: Esto eliminara TODAS las reservas de la base de datos
+    Luego re-sincronizara desde los iCals
   </div>
 
-  <h3>Lo que hará:</h3>
+  <h3>Lo que hara:</h3>
   <ol>
     <li>Eliminar TODAS las reservas existentes</li>
-    <li>Re-sincronizar iCal 50886202 → p1 (Cama doble)</li>
-    <li>Re-sincronizar iCal 50050101 → p2 (12 minutes)</li>
-    <li>Deduplicar automáticamente</li>
+    <li>Re-sincronizar iCal 50886202 -> p1 (Cama doble)</li>
+    <li>Re-sincronizar iCal 50050101 -> p2 (12 minutes)</li>
+    <li>Deduplicar automaticamente</li>
   </ol>
 
-  <button onclick="reset()">Sí, eliminar TODO y re-sincronizar</button>
+  <button onclick="reset()">Si, eliminar TODO y re-sincronizar</button>
 
   <div id="status"></div>
   <div id="result"></div>
@@ -47,7 +48,7 @@ export async function GET() {
     async function reset() {
       const btn = event.target;
       btn.disabled = true;
-      btn.textContent = '⏳ Borrando todo y re-sincronizando...';
+      btn.textContent = '[Procesando...] Borrando todo y re-sincronizando...';
 
       try {
         const res = await fetch('/api/admin/reset-and-sync', { method: 'POST' });
@@ -57,7 +58,7 @@ export async function GET() {
         document.getElementById('output').textContent = JSON.stringify(data, null, 2);
 
         if (res.ok) {
-          let html = '<div class="success"><strong>✓ ¡Éxito!</strong>';
+          let html = '<div class="success"><strong>[OK] Exito!</strong>';
           if (data.steps) {
             html += '<div style="margin-top: 10px;">';
             data.steps.forEach(step => {
@@ -75,15 +76,20 @@ export async function GET() {
           html += '</div>';
           document.getElementById('status').innerHTML = html;
         } else {
-          document.getElementById('status').innerHTML = '<div class="error"><strong>✗ Error:</strong> ' + data.error + '</div>';
+          const errMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+          document.getElementById('status').innerHTML = '<div class="error"><strong>[ERROR]</strong> ' + errMsg + '</div>';
         }
       } catch (e) {
-        document.getElementById('status').innerHTML = '<div class="error"><strong>✗ Error:</strong> ' + e.message + '</div>';
+        document.getElementById('status').innerHTML = '<div class="error"><strong>[ERROR]</strong> ' + e.message + '</div>';
       }
     }
   </script>
 </body>
 </html>
   `
-  return new NextResponse(html, { headers: { 'Content-Type': 'text/html' } })
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8'
+    }
+  })
 }

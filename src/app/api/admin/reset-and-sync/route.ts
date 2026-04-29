@@ -34,10 +34,10 @@ export async function POST() {
     await syncReservationsFromIcals()
     console.log('[Reset and Sync] ✓ Sync completed')
 
-    // Step 4: Get final count
+    // Step 4: Get final count by querying each property
     const { data: allRes, error: countError } = await supabase
       .from('reservations')
-      .select('property_id, count', { count: 'exact' })
+      .select('property_id')
 
     if (countError) throw countError
 
