@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
 
   const filename = record.txt_filename || 'mossos.txt'
   const content  = Buffer.from(record.txt_content).toString('base64')
-  const dashboardUrl = process.env.NEXTAUTH_URL?.replace('http://localhost:3000', 'https://checkin-dashboard-eight.vercel.app')
-    ?? 'https://checkin-dashboard-eight.vercel.app'
+  const dashboardUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'https://checkin-dashboard-eight.vercel.app'
   const callbackSecret = process.env.MOSSOS_CALLBACK_SECRET ?? ''
 
   const ghRes = await fetch('https://api.github.com/repos/anikashouse/airbnb_chekin/dispatches', {
