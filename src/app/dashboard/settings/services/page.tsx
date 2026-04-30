@@ -182,15 +182,25 @@ export default function ServicesPage() {
             </button>
           </div>
           {form.drive_enabled && (
-            <div className="pt-2 border-t border-gray-100">
-              <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Folder ID</label>
-              <input
-                type="text"
-                value={form.drive_folder_id}
-                onChange={e => setForm(f => ({ ...f, drive_folder_id: e.target.value }))}
-                placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
+            <div className="pt-2 border-t border-gray-100 space-y-3">
+              <div className="text-xs text-slate-500 bg-slate-50 rounded-lg p-3 space-y-1">
+                <p className="font-medium text-slate-600">¿Cómo obtener el Folder ID?</p>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Abre <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 underline">Google Drive</a> y navega a la carpeta donde quieres guardar los ficheros</li>
+                  <li>Mira la URL: <span className="font-mono bg-white px-1 rounded border border-slate-200">drive.google.com/drive/folders/<strong>FOLDER_ID</strong></span></li>
+                  <li>Copia la parte final de la URL (el ID)</li>
+                </ol>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Folder ID</label>
+                <input
+                  type="text"
+                  value={form.drive_folder_id}
+                  onChange={e => setForm(f => ({ ...f, drive_folder_id: e.target.value }))}
+                  placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
             </div>
           )}
         </div>
