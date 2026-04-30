@@ -1,135 +1,311 @@
 'use client'
 
-import { useMemo } from 'react'
-import type { Reservation } from '@/lib/types'
+import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import type { Reservation, Property } from '@/lib/types'
 
 interface CalendarProps {
   reservations: Reservation[]
+  properties?: Property[]
   year: number
   month: number
 }
 
-const COLORS = {
-  yellow: 'bg-yellow-100 border-yellow-300',
-  blue: 'bg-blue-100 border-blue-300',
-  green: 'bg-green-100 border-green-300',
-  pink: 'bg-pink-100 border-pink-300',
-  purple: 'bg-purple-100 border-purple-300',
+// RGB values so we can use them in rgba() backgrounds and solid borders
+const BLOCK_COLORS = [
+  { r: 200, g: 169, b: 110 }, // warm golden
+  { r:  99, g: 149, b: 210 }, // blue
+  { r:  90, g: 185, b: 140 }, // green
+  { r: 210, g: 110, b: 155 }, // pink
+  { r: 155, g: 120, b: 210 }, // purple
+]
+
+const monthNames = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+]
+const dayLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+
+function toDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+function parseLocalDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
 }
 
-const colorArray = Object.values(COLORS)
+type RGB = { r: number; g: number; b: number }
+type BlockItem = {
+  res: Reservation
+  color: RGB
+  isStart: boolean
+  isEnd: boolean
+}
 
-export default function Calendar({ reservations, year, month }: CalendarProps) {
-  const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate()
-  const firstDayOfMonth = (y: number, m: number) => new Date(y, m, 1).getDay()
+function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
+  return (
+    <div className="group relative">
+      <div className={`w-1.5 h-1.5 rounded-full cursor-help ${green ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-1.5 py-0.5 bg-slate-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+        {tooltip}
+      </div>
+    </div>
+  )
+}
 
-  const monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+function ReservationBlock({ item }: { item: BlockItem }) {
+  const { r, g, b } = item.color
+  const label = item.res.airbnbCode || item.res.guestName || 'Guest'
+
+  return (
+    <Link
+      href={`/dashboard/${item.res.propertyId}/${item.res.id}`}
+      className="block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter]"
+      style={{
+        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.125)`,
+        borderLeft:  item.isStart ? `2px solid rgb(${r}, ${g}, ${b})` : '2px solid transparent',
+        borderRight: item.isEnd   ? `2px solid rgb(${r}, ${g}, ${b})` : undefined,
+      }}
+    >
+      <div className="font-semibold text-slate-900 truncate text-xs">{label}</div>
+      <div className="flex gap-0.5 mt-0.5">
+        <StatusDot green={item.res.checkinStatus?.formComplete ?? false} tooltip={item.res.checkinStatus?.formComplete ? '✓ Formulario' : '○ Sin formulario'} />
+        <StatusDot green={item.res.checkinStatus?.txtGenerated ?? false} tooltip={item.res.checkinStatus?.txtGenerated ? '✓ .txt generado' : '○ Sin .txt'} />
+        <StatusDot green={item.res.checkinStatus?.mossosSent ?? false} tooltip={item.res.checkinStatus?.mossosSent ? '✓ Enviado a Mossos' : '○ Sin comprobante'} />
+      </div>
+    </Link>
+  )
+}
+
+export default function Calendar({ reservations, properties, year, month }: CalendarProps) {
+  const [view, setView] = useState<'month' | 'week'>('month')
+  const [weekStart, setWeekStart] = useState<Date>(() => {
+    const today = new Date()
+    const day = (today.getDay() + 6) % 7
+    const d = new Date(today)
+    d.setDate(today.getDate() - day)
+    d.setHours(0, 0, 0, 0)
+    return d
+  })
+
+  const todayStr = toDateStr(new Date())
+
+  const colorByProperty = useMemo(() => {
+    const map: Record<string, RGB> = {}
+    if (properties && properties.length > 0) {
+      properties.forEach((p, idx) => { map[p.id] = BLOCK_COLORS[idx % BLOCK_COLORS.length] })
+    }
+    return map
+  }, [properties])
+
+  // ── Month ────────────────────────────────────────────────────
+  const monthStart     = new Date(year, month, 1)
+  const monthEnd       = new Date(year, month + 1, 0)
+  const daysInMonth    = monthEnd.getDate()
+  const firstDayOfWeek = (monthStart.getDay() + 6) % 7
+  const totalCells     = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7
+  const calendarDays: (number | null)[] = [
+    ...Array(firstDayOfWeek).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+    ...Array(totalCells - firstDayOfWeek - daysInMonth).fill(null),
   ]
-
-  const totalDays = daysInMonth(year, month)
-  const firstDay = firstDayOfMonth(year, month)
-  const dayArray = Array.from({ length: totalDays }, (_, i) => i + 1)
-  const leadingNulls = Array(firstDay).fill(null)
-  const totalCells = Math.ceil((firstDay + totalDays) / 7) * 7
-  const trailingNulls = Array(totalCells - firstDay - totalDays).fill(null)
-  const calendarDays = leadingNulls.concat(dayArray).concat(trailingNulls)
-
-  // Get reservations that overlap with this month
-  const monthStart = new Date(year, month, 1)
-  const monthEnd = new Date(year, month + 1, 0)
 
   const relevantReservations = useMemo(() => {
     if (!reservations || !Array.isArray(reservations)) return []
     return reservations.filter(res => {
-      const checkOut = new Date(res.checkOut)
-      const checkIn = new Date(res.checkIn)
-      return checkOut > monthStart && checkIn <= monthEnd
+      const ci = parseLocalDate(res.checkIn)
+      const co = parseLocalDate(res.checkOut)
+      return co > monthStart && ci <= monthEnd
     })
   }, [reservations, year, month])
 
-  const getReservationColor = (index: number) => colorArray[index % colorArray.length]
-
-  // Create a map of day -> reservations for that day
-  const dayReservations = useMemo(() => {
-    const map: Record<number, Array<{ res: Reservation; colorClass: string; index: number }>> = {}
-
-    relevantReservations.forEach((res, resIndex) => {
-      const checkIn = new Date(res.checkIn)
-      const checkOut = new Date(res.checkOut)
-
-      // Find all days this reservation spans in the current month
-      let currentDate = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
-      currentDate.setHours(0, 0, 0, 0)
-
-      while (currentDate < checkOut && currentDate <= monthEnd) {
-        const dayOfMonth = currentDate.getDate()
-        if (!map[dayOfMonth]) map[dayOfMonth] = []
-        map[dayOfMonth].push({
-          res,
-          colorClass: getReservationColor(resIndex),
-          index: resIndex
-        })
-        currentDate.setDate(currentDate.getDate() + 1)
+  const dayMap = useMemo(() => {
+    const map: Record<number, BlockItem[]> = {}
+    relevantReservations.forEach((res, idx) => {
+      const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
+      const checkIn  = parseLocalDate(res.checkIn)
+      const checkOut = parseLocalDate(res.checkOut)
+      const lastNight = new Date(checkOut)
+      lastNight.setDate(lastNight.getDate() - 1)
+      let cur = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
+      cur.setHours(0, 0, 0, 0)
+      while (cur < checkOut && cur <= monthEnd) {
+        const d = cur.getDate()
+        if (!map[d]) map[d] = []
+        map[d].push({ res, color, isStart: toDateStr(cur) === res.checkIn, isEnd: toDateStr(cur) === toDateStr(lastNight) })
+        cur = new Date(cur)
+        cur.setDate(cur.getDate() + 1)
       }
     })
-
     return map
   }, [relevantReservations, year, month])
 
+  // ── Week ─────────────────────────────────────────────────────
+  const weekEnd = useMemo(() => {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate() + 6); return d
+  }, [weekStart])
+
+  const weekDays = useMemo(() =>
+    Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStart); d.setDate(weekStart.getDate() + i); return d
+    }), [weekStart])
+
+  const weekDayMap = useMemo(() => {
+    const map: Record<string, BlockItem[]> = {}
+    if (!reservations || !Array.isArray(reservations)) return map
+    reservations.forEach((res, idx) => {
+      const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
+      const checkIn  = parseLocalDate(res.checkIn)
+      const checkOut = parseLocalDate(res.checkOut)
+      const lastNight = new Date(checkOut); lastNight.setDate(lastNight.getDate() - 1)
+      weekDays.forEach(day => {
+        if (day >= checkIn && day < checkOut) {
+          const dayStr = toDateStr(day)
+          if (!map[dayStr]) map[dayStr] = []
+          map[dayStr].push({ res, color, isStart: dayStr === res.checkIn, isEnd: dayStr === toDateStr(lastNight) })
+        }
+      })
+    })
+    return map
+  }, [reservations, weekDays, colorByProperty])
+
+  const weekLabel = (() => {
+    const s = weekDays[0], e = weekDays[6]
+    const sm = monthNames[s.getMonth()].slice(0, 3)
+    const em = monthNames[e.getMonth()].slice(0, 3)
+    return s.getMonth() === e.getMonth()
+      ? `${s.getDate()} — ${e.getDate()} ${em} ${e.getFullYear()}`
+      : `${s.getDate()} ${sm} — ${e.getDate()} ${em} ${e.getFullYear()}`
+  })()
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-2xl font-bold text-slate-900 mb-6">
-        {monthNames[month]} De {year}
-      </h2>
-
-      <div className="border border-gray-300 rounded-lg overflow-hidden">
-        {/* Header with day names */}
-        <div className="grid grid-cols-7 gap-0 bg-gray-50 border-b border-gray-300">
-          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-            <div key={day} className="border-r border-gray-300 p-3 text-center font-bold text-slate-700 text-sm h-12 flex items-center justify-center">
-              {day}
-            </div>
-          ))}
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-bold text-slate-900">
+            {view === 'month' ? `${monthNames[month]} de ${year}` : weekLabel}
+          </h2>
+          <div className="flex items-center gap-1">
+            {(['month', 'week'] as const).map(v => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  view === v ? 'bg-orange-500 text-white' : 'text-slate-500 hover:text-slate-700 hover:bg-gray-100'
+                }`}
+              >
+                {v === 'month' ? 'Mes' : 'Semana'}
+              </button>
+            ))}
+          </div>
         </div>
-
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-0 bg-white">
-          {calendarDays.map((day, idx) => (
-            <div
-              key={idx}
-              className="border-r border-b border-gray-300 p-2 min-h-28"
-              style={{
-                borderRight: idx % 7 === 6 ? 'none' : undefined,
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => view === 'week' && setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() - 7); return n })}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          {view === 'week' && (
+            <button
+              onClick={() => {
+                const today = new Date()
+                const day = (today.getDay() + 6) % 7
+                const d = new Date(today); d.setDate(today.getDate() - day); d.setHours(0,0,0,0)
+                setWeekStart(d)
               }}
+              className="px-2.5 py-1 text-xs font-medium text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
             >
-              {day ? (
-                <div className="h-full">
-                  <div className="font-bold text-slate-700 mb-2 text-sm">{day}</div>
-                  <div className="space-y-1">
-                    {dayReservations[day]?.map((item, resIdx) => (
-                      <div
-                        key={`${item.res.id}-${resIdx}`}
-                        className={`text-xs p-2 rounded border ${item.colorClass} border-l-4`}
-                      >
-                        <div className="font-medium text-slate-900 truncate">
-                          {item.res.airbnbCode || item.res.guestName?.split(' ')[0] || 'Guest'}
-                        </div>
-                        {item.res.guestName && item.res.airbnbCode && (
-                          <div className="text-xs text-slate-600 truncate mt-0.5">
-                            {item.res.guestName}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ))}
+              Hoy
+            </button>
+          )}
+          <button
+            onClick={() => view === 'week' && setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() + 7); return n })}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 mb-1">
+        {dayLabels.map(d => (
+          <div key={d} className="text-center text-xs font-medium text-slate-400 py-1.5 uppercase tracking-wide">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Month grid */}
+      {view === 'month' && (
+        <div className="grid grid-cols-7 gap-1">
+          {calendarDays.map((day, idx) => {
+            const dayStr  = day ? `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}` : ''
+            const isToday = dayStr === todayStr
+            const items   = day ? (dayMap[day] || []) : []
+            return (
+              <div
+                key={idx}
+                className={`p-1.5 rounded-lg border min-h-24 flex flex-col ${
+                  !day
+                    ? 'bg-gray-50/50 border-slate-100'
+                    : isToday
+                      ? 'bg-amber-50 border-2 border-amber-400'
+                      : 'bg-white border-slate-100'
+                }`}
+              >
+                {day && (
+                  <>
+                    <div className={`text-xs font-bold mb-1 ${isToday ? 'text-orange-500' : 'text-slate-900'}`}>
+                      {day}
+                    </div>
+                    <div className="flex-1 space-y-0.5 overflow-hidden">
+                      {items.map((item, i) => <ReservationBlock key={`${item.res.id}-${i}`} item={item} />)}
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Week grid */}
+      {view === 'week' && (
+        <>
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {weekDays.map((day, i) => {
+              const isToday = toDateStr(day) === todayStr
+              return (
+                <div key={i} className={`text-center py-2 rounded-lg ${isToday ? 'bg-orange-50' : ''}`}>
+                  <div className={`text-lg font-bold ${isToday ? 'text-orange-500' : 'text-slate-800'}`}>{day.getDate()}</div>
+                  <div className="text-xs text-slate-400">{monthNames[day.getMonth()].slice(0,3)}</div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {weekDays.map((day, i) => {
+              const dayStr = toDateStr(day)
+              const isToday = dayStr === todayStr
+              const items = weekDayMap[dayStr] || []
+              return (
+                <div key={i} className={`p-1.5 rounded-lg border min-h-32 flex flex-col ${isToday ? 'bg-orange-50/40 border-orange-200' : 'bg-white border-slate-100'}`}>
+                  <div className="flex-1 space-y-0.5 overflow-hidden">
+                    {items.map((item, j) => <ReservationBlock key={`${item.res.id}-${j}`} item={item} />)}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }

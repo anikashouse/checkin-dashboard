@@ -11,6 +11,13 @@ export interface Property {
   updated_at?: string
 }
 
+export interface CheckinStatus {
+  formComplete: boolean
+  txtGenerated: boolean
+  mossosSent: boolean
+  sentAt?: string
+}
+
 export interface Reservation {
   id: string
   propertyId: string
@@ -22,17 +29,23 @@ export interface Reservation {
   guests?: number
   checkedInAt?: string
   tel_suffix?: string
+  checkinStatus?: CheckinStatus
   created_at?: string
   updated_at?: string
 }
 
 export interface CheckinRecord {
   id: string
-  property_id: string
   reservation_id: string
-  guest_name: string
-  check_in_date: string
-  status: 'pending' | 'completed' | 'failed'
+  airbnb_code: string
+  guest_data?: Record<string, unknown>
+  txt_content?: string
+  txt_filename?: string
+  txt_path?: string
+  pdf_path?: string
+  form_complete: boolean
+  mossos_sent: boolean
+  sent_at?: string
   created_at: string
   updated_at: string
 }

@@ -4,42 +4,45 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { Property } from '@/lib/types'
 
+const PROPERTY_COLORS = [
+  'bg-yellow-400',
+  'bg-blue-400',
+  'bg-green-400',
+  'bg-pink-400',
+  'bg-purple-400',
+]
+
 export default function SidebarNav({ properties }: { properties: Property[] }) {
   const pathname = usePathname()
-
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   return (
-    <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 mb-3">
+    <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-3 mb-2 mt-1">
         Propiedades
       </p>
-      {properties.map(p => {
+      {properties.map((p, idx) => {
         const href = `/dashboard/${p.id}`
         const active = isActive(href)
         return (
           <Link
             key={p.id}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
-              active
-                ? 'bg-slate-700 text-white'
-                : 'text-slate-300 hover:text-white hover:bg-slate-700'
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+              active ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <span className="w-2 h-2 rounded-full shrink-0 bg-blue-400" />
+            <span className={`w-2 h-2 rounded-full shrink-0 ${PROPERTY_COLORS[idx % PROPERTY_COLORS.length]}`} />
             <span className="text-sm truncate">{p.name}</span>
           </Link>
         )
       })}
 
-      <div className="pt-4 mt-4 border-t border-slate-700 space-y-1">
+      <div className="pt-3 mt-3 border-t border-slate-800 space-y-0.5">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
-            pathname === '/dashboard'
-              ? 'bg-slate-700 text-white'
-              : 'text-slate-300 hover:text-white hover:bg-slate-700'
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+            pathname === '/dashboard' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,10 +53,8 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
         <Link
           href="/dashboard/settings/properties"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
-            isActive('/dashboard/settings/properties')
-              ? 'bg-slate-700 text-white'
-              : 'text-slate-300 hover:text-white hover:bg-slate-700'
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/dashboard/settings/properties') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,6 +62,18 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className="text-sm">Propiedades</span>
+        </Link>
+
+        <Link
+          href="/dashboard/settings/profile"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/dashboard/settings/profile') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span className="text-sm">Perfil</span>
         </Link>
       </div>
     </nav>

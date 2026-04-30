@@ -1,317 +1,247 @@
-# CheckIn Dashboard - Setup & Implementation Guide
+# CheckIn Dashboard — Product Roadmap & Progress
 
-## Part 1: User Setup (Manual Steps for New Users)
-
-### Step 1.1: Get Airbnb iCal URLs
-- [ ] Go to Airbnb Host Dashboard
-- [ ] For each property: Settings → Calendar → Copy iCal URL
-- [ ] Store URLs safely (they contain tokens)
-- [ ] Example: `https://www.airbnb.es/calendar/ical/50886202.ics?t=...`
-
-**How to find it:**
-1. Login to Airbnb as host
-2. Go to "Manage listings"
-3. Click on a property
-4. Calendar settings → iCal subscription
-5. Copy the full URL
+## What this is
+A platform for Airbnb hosts to manage guest check-ins. Users sign up, connect their properties via iCal,
+and can send guest data to Mossos d'Esquadra (Spanish police) via API. Each reservation tracks 3 status
+indicators: form filled, .txt generated, sent to Mossos.
 
 ---
 
-### Step 1.2: Prepare Mossos Information
-- [ ] Get establishment ID from Mossos registration (if applicable)
-- [ ] Example: `ID50044239`
-- [ ] Note: Required only for Spanish properties
+## CURRENT STATUS SNAPSHOT
 
----
-
-### Step 1.3: Deploy Own Instance
-- [ ] Fork/clone the repository
-- [ ] Create Supabase project
-- [ ] Setup environment variables
-- [ ] Deploy to Vercel/similar
-- [ ] (See Part 3: Deployment)
-
----
-
-### Step 1.4: Create User Account
-- [ ] Login to dashboard (once auth is implemented)
-- [ ] Or contact admin for account creation
-- [ ] (See Part 2.1: Authentication)
-
----
-
-### Step 1.5: Add Properties via UI
-- [ ] Go to Dashboard → Propiedades (Properties)
-- [ ] Click "+ Add Property"
-- [ ] Fill in:
-  - Property ID (e.g., p1, p2)
-  - Property Name
-  - iCal URL (from Step 1.1)
-  - Mossos ID (optional, from Step 1.2)
-- [ ] Click "Test iCal" to validate
-- [ ] Click "Create Property"
-
----
-
-### Step 1.6: Initial Sync
-- [ ] In Properties settings, click "Sync Now"
-- [ ] Wait for reservations to load
-- [ ] Check dashboard to see reservations
-
----
-
-## Part 2: Technical Implementation (Development)
-
-### Part 2.1: Authentication with NextAuth ✓
-- [x] Implement NextAuth sign-up flow
-- [x] Implement NextAuth sign-in flow
-- [x] Protect routes with session checks
-- [x] Add logout functionality
-- [x] Store user_id in session
-- [x] Add login page at `/auth/signin`
-
-**Files to create/modify:**
 ```
-src/app/auth/signin/page.tsx (NEW)
-src/app/auth/signup/page.tsx (NEW)
-src/lib/auth.ts (NEW)
-src/middleware.ts (NEW - protect routes)
+[✓] Auth & onboarding foundation
+[✓] Multi-tenancy (each user sees only their data)
+[✓] Dashboard layout (sidebar + calendar + property cards)
+[✓] Calendar with reservations per property (check-in/check-out indicators)
+[✓] Calendar colors pinned per property (consistent across all views)
+[✓] Property detail pages (clickable from sidebar)
+[✓] Properties settings page (add, edit, test iCal, sync)
+[✓] Reservations sorted earliest→latest (in both property detail and resumen)
+[✓] Onboarding flow for new users (/setup, 2 steps: property + services, with skip)
+[✓] Deployed to Vercel: checkin-dashboard-eight.vercel.app
+
+[✓] Per-property color pinned consistently in calendar
+[✓] Reservation detail page (clickable reservations)
+[✓] 3 Mossos status badges (scaffold) in reservation list rows + calendar blocks
+[✓] List of ALL reservations across properties on Resumen page (split by property, colored cards)
+[✓] Calendar weekly view (toggle Mes/Semana, week starts Monday, < Hoy > navigation)
+[✓] Visual overhaul v2: Geist font, calendar white card cells + amber today, tooltip status dots
+[✓] Edit property button from property detail page (modal con nombre, dirección, iCal, Mossos ID)
+[✓] Delete property (con confirmación, cascada reservas, desde detail y settings)
+[✓] Logout button in sidebar
+[ ] Mossos integration (real data: checkin_records table + .txt + PDF comprobante)
+[ ] Services management page in dashboard (/dashboard/settings/services)
+[ ] Per-property color picker
+[ ] Bulk sync all properties
 ```
 
 ---
 
-### Part 2.2: Multi-Tenancy - Database Schema ✓
-- [x] Update `properties` table to filter by `user_id`
-- [x] Update `reservations` table (already has property_id)
-- [x] Add RLS (Row Level Security) policies
-- [x] Ensure all queries filter by user context
+## PART 1 — Auth & Onboarding
 
-**RLS Policies needed:**
+### 1.1 Authentication ✓
+- [x] Google OAuth via NextAuth
+- [x] Users saved to Supabase on first login
+- [x] Middleware protects all `/dashboard/*` routes
+- [x] Session carries `user_id`
+- [x] Sign-in page at `/auth/signin`
+
+### 1.2 Onboarding flow for new users ✓
+- [x] Detect first-time login — dashboard redirects to `/setup` if no properties exist
+- [x] Onboarding screen at `/setup`:
+  - [x] Step 1: Add property (name, address, city, iCal URL, Mossos ID) — or skip
+  - [x] Step 2: Connect services (email, Telegram, Google Drive) — or skip
+- [x] After onboarding → redirect to `/dashboard`
+- [ ] Allow returning to onboarding / re-configuring services from settings (no link exists yet)
+
+---
+
+## PART 2 — Dashboard & Navigation
+
+### 2.1 Layout & Sidebar ✓
+- [x] Dark sidebar (`slate-900`) + light content area
+- [x] Sidebar shows all user's properties as nav links
+- [x] "Resumen" link → main dashboard
+- [x] "Propiedades" link → settings/properties
+- [x] User avatar + email at bottom of sidebar
+- [x] Shared layout via `dashboard/layout.tsx` (no duplication)
+- [x] Logout button in sidebar (bottom-left, per FUNCTIONALLITY.md)
+
+### 2.2 Resumen page (`/dashboard`) ✓
+- [x] Calendar showing all reservations across all properties
+- [x] Each reservation block shows code + check-in (green dot) / check-out (orange dot)
+- [x] Today highlighted with orange ring
+- [x] Property cards (icon, name, address, reservation count, days until next)
+- [x] Reservation summary (total, proximas, activas, completadas)
+- [x] Per-property color pinned in calendar
+- [ ] List of ALL reservations across properties, sorted earliest→latest
+
+### 2.3 Property detail page (`/dashboard/[id]`) ✓
+- [x] Property-specific calendar
+- [x] List of reservations for that property
+- [x] Reservations sorted earliest → latest (via `db.ts` `order('check_in', ascending: true)`)
+- [x] Each reservation clickable → reservation detail page
+- [x] Edit property button (modal: nombre, dirección, iCal URL, Mossos ID)
+- [x] Delete property (confirmación inline + cascada reservas)
+- [x] Mossos 3-status badges visible in reservation list rows (scaffold, all pending)
+
+### 2.4 Reservation detail page (`/dashboard/[id]/[reservationId]`)
+- [x] Show all reservation fields (code, guest name, check-in, check-out, nights, guests, phone)
+- [ ] Edit reservation fields
+- [x] **3 Mossos status indicators (scaffold, all grey/pending):**
+  - [ ] Form status: green if checkin form filled correctly, red if missing/wrong (needs checkin_records)
+  - [ ] .txt file: green if generated, with download button (stored in Supabase Storage)
+  - [ ] Mossos sent: green if sent, red if not — with PDF comprobante download
+- [x] Button scaffold: "Enviar enlace al huésped" (disabled)
+- [x] Button scaffold: "Generar .txt" (disabled)
+- [x] Button scaffold: "Enviar a Mossos" (disabled)
+
+---
+
+## PART 3 — Properties Management
+
+### 3.1 Properties settings page (`/dashboard/settings/properties`) ✓
+- [x] List all properties with iCal URL, Mossos ID
+- [x] Edit each property (name, iCal URL, Mossos ID)
+- [x] Add new property
+- [x] Test iCal button
+- [x] Sync Now button (fetches iCal and saves reservations)
+- [ ] Bulk "Sync All" button
+- [ ] Delete property
+- [ ] Per-property color picker (for calendar color coding)
+
+### 3.2 iCal sync engine ✓
+- [x] Fetches iCal from Airbnb URL
+- [x] Parses VEVENT blocks
+- [x] Filters out blocked/unavailable events
+- [x] Extracts: code, guest name, check-in, check-out, nights, guests, phone suffix
+- [x] Deduplicates by airbnb_code across properties
+- [x] Upserts to Supabase `reservations` table
+
+---
+
+## PART 4 — Mossos Integration
+
+### 4.1 Guest checkin form (airbnb_chekin repo)
+- [x] Separate repo: sends guest data to this dashboard
+- [ ] Form data stored in `checkin_records` table linked to reservation
+- [ ] Validation: all required fields present and correctly formatted
+
+### 4.2 .txt file generation
+- [ ] Generate Mossos-format .txt from checkin_record data
+- [ ] Store .txt in Supabase Storage (`mossos-txt` bucket)
+- [ ] Update reservation status: `txt_generated = true`
+- [ ] Download button in reservation detail page
+- [ ] Upload button (in case generated externally)
+
+### 4.3 Send to Mossos API
+- [ ] POST to Mossos API with .txt file
+- [ ] Receive PDF comprobante in response
+- [ ] Store PDF in Supabase Storage (`mossos-pdf` bucket)
+- [ ] Update reservation status: `mossos_sent = true`, `sent_at = timestamp`
+- [ ] Download button for comprobante in reservation detail page
+- [ ] Upload button (in case sent externally)
+
+### 4.4 Status indicators in reservation list
+- [ ] Form filled: green / red badge per reservation row
+- [ ] .txt file: green / red badge per reservation row
+- [ ] Mossos sent: green / red badge per reservation row
+- [ ] Show these 3 badges in the reservation list inside property detail page
+
+---
+
+## PART 5 — Services Management
+
+### 5.1 Onboarding services step (partial) ✓
+- [x] Step 2 of `/setup` lets user enable and input credentials for email, Telegram, Google Drive
+- [x] Form POSTs to `/api/user-services` on save (or skip)
+- [ ] Test connection button per service (not implemented)
+- [ ] Credentials actually validated / connections tested before saving
+
+### 5.2 Services management page in dashboard
+- [ ] Dedicated page at `/dashboard/settings/services`
+- [ ] List connected services (Telegram, email, Drive, etc.)
+- [ ] Connect / disconnect each service
+- [ ] Edit credentials for each service
+
+### 5.3 Telegram
+- [ ] Input: bot token + chat ID (onboarding UI exists; backend validation pending)
+- [ ] Test connection button
+- [ ] Use: send checkin link to guest, notify host of new reservation
+
+### 5.4 Email
+- [ ] Input: email address (onboarding UI exists; SMTP/SendGrid backend pending)
+- [ ] Test connection button
+- [ ] Use: send checkin link to guest
+
+### 5.5 Google Drive
+- [ ] Input: folder ID (onboarding UI exists; OAuth/real connection pending)
+- [ ] OAuth connection
+- [ ] Use: backup .txt and PDF files to Drive automatically
+
+---
+
+## PART 6 — Database Schema
+
+### Tables (current) ✓
 ```sql
--- Properties: users can only see their own
--- Reservations: users can only see reservations from their properties
--- CheckinRecords: users can only see records for their properties
+users          (id, email, name, created_at)
+properties     (id, user_id, name, address, ical_url, mossos_id, cover_color)
+reservations   (id, property_id, airbnb_code, guest_name, check_in, check_out,
+                nights, guests, tel_suffix, checked_in_at)
 ```
 
----
-
-### Part 2.3: Update API Endpoints ✓
-- [x] Get user from session in all endpoints
-- [x] Filter properties by user_id
-- [x] Filter reservations by user's properties
-- [x] Prevent cross-user data access
-
-**Endpoints to update:**
-```
-GET /admin/properties/list → filter by session.user.id
-GET /sync/ical → iterate only user's properties
-POST /admin/properties/create → add user_id
-PUT /admin/properties/{id} → verify ownership
-```
-
----
-
-### Part 2.4: Update UI Components (partial)
-- [x] Show user info in sidebar
-- [x] Add sign-out button
-- [x] Show only user's properties
-- [ ] Hide admin endpoints from regular users
-- [ ] Add role-based access control (RBAC)
-
----
-
-### Part 2.5: User Profile Page
-- [ ] Create `/dashboard/profile` page
-- [ ] Show user info (email, joined date, etc)
-- [ ] Allow change password
-- [ ] Show API key for integrations (future)
-
----
-
-## Part 3: Deployment
-
-### Step 3.1: Environment Setup
-- [ ] Create `.env.production` file
-- [ ] Get Supabase keys from project settings
-- [ ] Configure OAuth providers (Google, GitHub, etc)
-- [ ] Set NEXTAUTH_SECRET (generate: `openssl rand -base64 32`)
-- [ ] Set NEXTAUTH_URL to production domain
-
-**Required env vars:**
-```
-NEXT_PUBLIC_SUPABASE_URL=https://...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-NEXTAUTH_SECRET=...
-NEXTAUTH_URL=https://yourdomain.com
-```
-
----
-
-### Step 3.2: Database Initialization ✓
-- [x] Create Supabase project
-- [x] Run migrations (create users, properties, reservations tables)
-- [x] Setup RLS policies
-- [ ] Configure backups
-- [ ] Setup logging
-
-**Migrations needed:**
+### Tables (needed)
 ```sql
--- Add user_id to properties if not exists
--- Add RLS policies
--- Create indexes for performance
+checkin_records  (id, reservation_id, guest_data jsonb, form_complete bool,
+                  txt_path text, pdf_path text, mossos_sent bool, sent_at timestamp)
+
+user_services    (id, user_id, service_name, credentials jsonb, connected_at)
 ```
 
----
-
-### Step 3.3: Deploy to Vercel ✓
-- [x] Connect GitHub repo to Vercel
-- [x] Add environment variables in Vercel dashboard
-- [x] Configure build settings
-- [x] Deploy preview environment first
-- [x] Test thoroughly before production
+### RLS Policies ✓
+- Properties: user sees only their own
+- Reservations: user sees only from their properties
+- checkin_records: user sees only from their reservations (pending — table not yet created)
 
 ---
 
-### Step 3.4: Domain & SSL
-- [ ] Configure custom domain in Vercel
-- [ ] SSL certificate (automatic with Vercel)
-- [ ] Update NEXTAUTH_URL to match domain
-- [ ] Test login on production domain
+## PART 7 — Deployment
 
----
+### 7.1 Vercel ✓
+- [x] Connected to GitHub `anikashouse/checkin-dashboard`
+- [x] Auto-deploy on push to `main`
+- [x] Live at: `checkin-dashboard-eight.vercel.app`
 
-### Step 3.5: Monitoring & Backups
-- [ ] Setup Supabase backups
-- [ ] Configure error tracking (Sentry?)
-- [ ] Setup uptime monitoring
-- [ ] Create runbook for common issues
-
----
-
-## Part 4: Additional Features
-
-### Part 4.1: Multi-Property Support (partial)
-- [x] Users can add multiple properties
-- [x] Dashboard shows all user's properties
-- [ ] Bulk operations (sync all, etc)
-- [ ] Property-specific settings
-
----
-
-### Part 4.2: Team Management
-- [ ] Invite other users to manage properties
-- [ ] Role-based permissions (admin, manager, viewer)
-- [ ] Activity log of who did what
-
----
-
-### Part 4.3: API Keys for Integrations
-- [ ] Generate API keys per user
-- [ ] Allow external integrations
-- [ ] Rate limiting per key
-
----
-
-### Part 4.4: Webhooks
-- [ ] Setup webhooks for real-time updates
-- [ ] Notify when new reservation arrives
-- [ ] Integration with Slack/Discord
-
----
-
-## Priority Order
-
-**Priority 1 (Must have):**
-1. Authentication (Part 2.1)
-2. Multi-tenancy DB (Part 2.2)
-3. Update API endpoints (Part 2.3)
-4. Environment variables for deployment (Part 3.1)
-5. Supabase setup guide (Part 3.2)
-
-**Priority 2 (Should have):**
-6. Update UI (Part 2.4)
-7. Vercel deployment (Part 3.3)
-8. Multi-property support (Part 4.1)
-
-**Priority 3 (Nice to have):**
-9. User profile (Part 2.5)
-10. Team management (Part 4.2)
-11. API keys (Part 4.3)
-12. Webhooks (Part 4.4)
-
----
-
-## Current Status
-
+### 7.2 Environment variables needed
 ```
-[  ] Part 1: User Setup (Manual guide)
-
-[✓] Part 2.1: Authentication
-    - NextAuth configured with Google OAuth
-    - Users saved to Supabase on first login
-    - Middleware protects dashboard routes
-    - Session includes user_id
-    
-[✓] Part 2.2: Multi-tenancy DB
-    - users table created with RLS
-    - user_id column added to properties
-    - RLS policies configured for both tables
-    - Each user can only see their own data
-    
-[✓] Part 2.3: API Endpoints
-    - All endpoints filter by user_id
-    - property_id filtering in queries
-    - Supabase service role key configured
-
-[✓] Part 2.4: UI Components - PARTIAL
-    [✓] Dashboard layout (dark sidebar + light content)
-    [✓] Calendar component (month view with reservations)
-    [✓] Property cards (with reservation counts)
-    [✓] Reservation summary (próximas, activas, completadas)
-    [✓] Property detail page (/dashboard/[id])
-    [ ] Edit property modal
-    [ ] Add property form
-    
-[  ] Part 2.5: User Profile
-[  ] Part 3.1: Environment Setup
-[✓] Part 3.2: Database Initialization
-    - Supabase project configured
-    - Tables created and synced
-    
-[✓] Part 3.3: Deploy to Vercel
-    - Deployed and live at checkin-dashboard-eight.vercel.app
-    - Auto-deploy from GitHub main branch
-    
-[  ] Part 3.4: Domain & SSL
-[  ] Part 3.5: Monitoring
-
-[✓] Part 4.1: Multi-property Support - PARTIAL
-    [✓] Users can add multiple properties
-    [✓] Dashboard shows all user's properties
-    [✓] Property-specific calendar view
-    [ ] Bulk operations (sync all)
-    [ ] Property-specific settings
-    
-[  ] Part 4.2: Team Management
-[  ] Part 4.3: API Keys
-[  ] Part 4.4: Webhooks
-
-[  ] ADDITIONAL: Mossos Integration
-    [ ] Status badges for Mossos uploads
-    [ ] Sync to Mossos API
-    [ ] Checkin form with Mossos code
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXTAUTH_SECRET
+NEXTAUTH_URL
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
 ```
 
+### 7.3 Pending
+- [ ] Custom domain + SSL
+- [ ] Supabase Storage buckets (`mossos-txt`, `mossos-pdf`)
+- [ ] Supabase backups configured
+- [ ] Error tracking (Sentry)
+
 ---
 
-## Next Steps
+## NEXT PRIORITIES
 
-1. **Start with Part 2.1** - Implement authentication
-2. Make sure Part 2.2 is done - Database RLS
-3. Update all endpoints - Part 2.3
-4. Update UI to be multi-tenant - Part 2.4
-5. Test thoroughly locally
-6. Deploy to Vercel - Part 3.3
-
-**Ready to start?** → Let's begin with Part 2.1: Authentication
+**Next up (in order):**
+1. ~~Logout button in sidebar~~ ✓
+2. Reservations clickable → reservation detail page (scaffold)
+3. Per-property color pinned in calendar (use `property.cover_color` or stable hash of property ID)
+4. Reservation detail page with 3 Mossos status indicators
+5. `checkin_records` table + link form data to reservations
+6. .txt generation + Mossos API send
+7. List of ALL reservations on Resumen page
+8. Services management page + real service connections (Telegram first)
+9. Edit property from property detail page

@@ -1,5 +1,7 @@
-import { supabase } from './supabase'
-import type { Property, Reservation } from './types'
+import { supabase, supabaseAdmin } from './supabase'
+import type { Property, Reservation, CheckinStatus } from './types'
+
+const db = supabaseAdmin ?? supabase
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function rowToProperty(row: any): Property {
@@ -16,45 +18,85 @@ function rowToProperty(row: any): Property {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function rowToReservation(row: any): Reservation {
+function rowToReservation(row: any, checkinStatus?: CheckinStatus): Reservation {
   return {
-    id:          row.id,
-    propertyId:  row.property_id,
-    airbnbCode:  row.airbnb_code,
-    guestName:   row.guest_name,
-    checkIn:     row.check_in,
-    checkOut:    row.check_out,
-    nights:      row.nights,
-    guests:      row.guests,
-    checkedInAt: row.checked_in_at ?? undefined,
-    tel_suffix:  row.tel_suffix ?? undefined,
+    id:            row.id,
+    propertyId:    row.property_id,
+    airbnbCode:    row.airbnb_code,
+    guestName:     row.guest_name,
+    checkIn:       row.check_in,
+    checkOut:      row.check_out,
+    nights:        row.nights,
+    guests:        row.guests,
+    checkedInAt:   row.checked_in_at ?? undefined,
+    tel_suffix:    row.tel_suffix ?? undefined,
+    checkinStatus,
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToCheckinStatus(row: any): CheckinStatus {
+  return {
+    formComplete: row.form_complete ?? false,
+    txtGenerated: !!(row.txt_path || row.txt_content),
+    mossosSent:   row.mossos_sent ?? false,
+    sentAt:       row.sent_at ?? row.completed_at ?? undefined,
+  }
+}
+
+async function attachCheckinStatuses(reservations: Reservation[]): Promise<Reservation[]> {
+  if (!reservations.length) return reservations
+  const ids = reservations.map(r => r.id)
+  const { data } = await db.from('checkin_records').select('*').in('reservation_id', ids)
+  if (!data || !data.length) return reservations
+  const byResId = new Map(data.map((r: any) => [r.reservation_id, rowToCheckinStatus(r)]))
+  return reservations.map(res => ({ ...res, checkinStatus: byResId.get(res.id) }))
+}
+
 export async function getProperties(): Promise<Property[]> {
-  const { data, error } = await supabase.from('properties').select('*').order('name')
+  const { data, error } = await db.from('properties').select('*').order('name')
   if (error) { console.error('getProperties:', error); return [] }
   return data.map(rowToProperty)
 }
 
 export async function getProperty(id: string): Promise<Property | null> {
-  const { data, error } = await supabase.from('properties').select('*').eq('id', id).single()
+  const { data, error } = await db.from('properties').select('*').eq('id', id).single()
   if (error || !data) return null
   return rowToProperty(data)
 }
 
+export async function getReservation(id: string): Promise<Reservation | null> {
+  const { data, error } = await db.from('reservations').select('*').eq('id', id).single()
+  if (error || !data) return null
+  const res = rowToReservation(data)
+  const { data: cr } = await db.from('checkin_records').select('*').eq('reservation_id', id).maybeSingle()
+  if (cr) res.checkinStatus = rowToCheckinStatus(cr)
+  return res
+}
+
 export async function getReservations(propertyId: string): Promise<Reservation[]> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('reservations')
     .select('*')
     .eq('property_id', propertyId)
     .order('check_in', { ascending: true })
   if (error) { console.error('getReservations:', error); return [] }
-  return data.map(rowToReservation)
+  return attachCheckinStatuses(data.map(rowToReservation))
+}
+
+export async function getReservationsByProperties(propertyIds: string[]): Promise<Reservation[]> {
+  if (!propertyIds.length) return []
+  const { data, error } = await db
+    .from('reservations')
+    .select('*')
+    .in('property_id', propertyIds)
+    .order('check_in', { ascending: true })
+  if (error) { console.error('getReservationsByProperties:', error); return [] }
+  return attachCheckinStatuses(data.map(rowToReservation))
 }
 
 export async function getAllReservations(): Promise<Reservation[]> {
-  const { data, error } = await supabase.from('reservations').select('*')
+  const { data, error } = await db.from('reservations').select('*')
   if (error) { console.error('getAllReservations:', error); return [] }
   return data.map(rowToReservation)
 }
@@ -208,7 +250,7 @@ export async function syncReservationsFromIcals(): Promise<void> {
         if (existing) {
           if (existing.checkedInAt) continue // Skip if already checked in
 
-          const { error } = await supabase
+          const { error } = await db
             .from('reservations')
             .update({
               guest_name: event.guestName,
@@ -223,7 +265,7 @@ export async function syncReservationsFromIcals(): Promise<void> {
           if (error) console.error('Error updating reservation:', error)
         } else if (!existingGlobal) {
           // Only insert if it doesn't exist in any property
-          const { error } = await supabase.from('reservations').insert({
+          const { error } = await db.from('reservations').insert({
             id: `${prop.id}-${event.airbnbCode}`,
             property_id: prop.id,
             airbnb_code: event.airbnbCode,
