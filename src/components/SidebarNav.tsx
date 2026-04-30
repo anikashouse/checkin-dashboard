@@ -65,6 +65,18 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
         </Link>
 
         <Link
+          href="/dashboard/settings/services"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+            isActive('/dashboard/settings/services') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span className="text-sm">Servicios</span>
+        </Link>
+
+        <Link
           href="/dashboard/settings/profile"
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
             isActive('/dashboard/settings/profile') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
