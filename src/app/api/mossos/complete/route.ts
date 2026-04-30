@@ -26,11 +26,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'recordId required' }, { status: 400, headers: corsHeaders })
     }
 
+    const { data: resRow } = await db.from('reservations').select('property_id, airbnb_code').eq('id', recordId).maybeSingle()
+
     const now = new Date().toISOString()
     const { error } = await db.from('checkin_records').upsert({
       id: crypto.randomUUID(),
       reservation_id: recordId,
-      airbnb_code: recordId.split('-').slice(1).join('-'),
+      property_id: resRow?.property_id ?? null,
+      airbnb_code: resRow?.airbnb_code ?? recordId.split('-').slice(1).join('-'),
       pdf_base64: pdfBase64 ?? null,
       mossos_sent: true,
       mossos_status: 'sent',

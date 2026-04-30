@@ -20,10 +20,14 @@ export async function POST(request: NextRequest) {
   const buffer = await file.arrayBuffer()
   const base64 = Buffer.from(buffer).toString('base64')
 
+  const { data: res } = await db.from('reservations').select('property_id, airbnb_code').eq('id', reservationId).maybeSingle()
+  if (!res) return NextResponse.json({ error: 'Reservation not found' }, { status: 404 })
+
   const { error } = await db.from('checkin_records').upsert({
     id: crypto.randomUUID(),
     reservation_id: reservationId,
-    airbnb_code: reservationId.split('-').slice(1).join('-'),
+    property_id: res.property_id,
+    airbnb_code: res.airbnb_code,
     pdf_base64: base64,
     mossos_sent: true,
     sent_at: new Date().toISOString(),

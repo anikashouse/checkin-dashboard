@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const { data: reservation } = await db
       .from('reservations')
-      .select('id')
+      .select('id, property_id')
       .ilike('airbnb_code', airbnbCode)
       .maybeSingle()
 
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
     const { error } = await db.from('checkin_records').upsert({
       id: crypto.randomUUID(),
       reservation_id: reservation.id,
+      property_id: reservation.property_id,
       airbnb_code: airbnbCode.toUpperCase(),
       guest_data: guestData ?? null,
       txt_content: txtContent ?? null,
