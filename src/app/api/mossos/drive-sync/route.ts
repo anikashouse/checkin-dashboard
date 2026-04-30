@@ -10,14 +10,19 @@ export async function POST() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    return NextResponse.json({ error: 'Service Account no configurada en Vercel (GOOGLE_SERVICE_ACCOUNT_JSON)' }, { status: 400 })
+  }
+
   const { data: services } = await db
     .from('user_services')
-    .select('drive_folder_id, google_refresh_token')
+    .select('drive_folder_id')
     .eq('user_id', session.user.id)
     .maybeSingle()
 
-  if (!services?.drive_folder_id) return NextResponse.json({ error: 'No hay carpeta configurada' }, { status: 400 })
-  if (!services?.google_refresh_token) return NextResponse.json({ error: 'No hay token de Google. Cierra sesión y vuelve a entrar.' }, { status: 400 })
+  if (!services?.drive_folder_id) {
+    return NextResponse.json({ error: 'No hay carpeta configurada' }, { status: 400 })
+  }
 
   const { data: records, error } = await db
     .from('checkin_records')
@@ -40,7 +45,6 @@ export async function POST() {
           filename: rec.txt_filename ?? `mossos_${base}.txt`,
           content: rec.txt_content,
           mimeType: 'text/plain',
-          refreshToken: services.google_refresh_token,
         })
         uploaded++
       } catch (e: unknown) {
@@ -55,7 +59,6 @@ export async function POST() {
           filename: `comprovant_${base}.pdf`,
           content: Buffer.from(rec.pdf_base64, 'base64'),
           mimeType: 'application/pdf',
-          refreshToken: services.google_refresh_token,
         })
         uploaded++
       } catch (e: unknown) {
@@ -65,7 +68,7 @@ export async function POST() {
   }
 
   return NextResponse.json({
-    ok: true,
+    ok: errors.length === 0,
     uploaded,
     errors: errors.length ? errors : undefined,
     message: `${uploaded} fichero(s) subidos a Drive${errors.length ? ` (${errors.length} errores)` : ''}`,

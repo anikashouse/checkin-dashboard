@@ -51,13 +51,12 @@ export async function POST(request: NextRequest) {
     try {
       const { data: services } = await db
         .from('user_services')
-        .select('drive_enabled, drive_folder_id, google_refresh_token')
+        .select('drive_enabled, drive_folder_id')
         .eq('drive_enabled', true)
         .not('drive_folder_id', 'is', null)
-        .not('google_refresh_token', 'is', null)
         .maybeSingle()
 
-      if (services?.drive_folder_id && services?.google_refresh_token) {
+      if (services?.drive_folder_id && process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
         const baseName = filename?.replace(/\.pdf$/i, '') ?? recordId
 
         if (pdfBase64) {
@@ -66,7 +65,6 @@ export async function POST(request: NextRequest) {
             filename: filename ?? `comprovant_${baseName}.pdf`,
             content: Buffer.from(pdfBase64, 'base64'),
             mimeType: 'application/pdf',
-            refreshToken: services.google_refresh_token,
           })
           console.log('[mossos/complete] PDF subido a Drive')
         }
@@ -83,7 +81,6 @@ export async function POST(request: NextRequest) {
             filename: record.txt_filename ?? `mossos_${baseName}.txt`,
             content: record.txt_content,
             mimeType: 'text/plain',
-            refreshToken: services.google_refresh_token,
           })
           console.log('[mossos/complete] TXT subido a Drive')
         }
