@@ -97,9 +97,9 @@ export default async function Dashboard() {
                               <span>{displayName}</span>
                             </span>
                             <div className="flex gap-1 shrink-0">
-                              <span className="w-2 h-2 rounded-full bg-slate-300" title="Formulario" />
-                              <span className="w-2 h-2 rounded-full bg-slate-300" title=".txt" />
-                              <span className="w-2 h-2 rounded-full bg-slate-300" title="Mossos" />
+                              <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.formComplete ? 'bg-green-400' : 'bg-slate-300'}`} title="Formulario" />
+                              <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.txtGenerated ? 'bg-green-400' : 'bg-slate-300'}`} title=".txt" />
+                              <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.mossosSent ? 'bg-green-400' : 'bg-slate-300'}`} title="Mossos" />
                             </div>
                           </Link>
                         )
