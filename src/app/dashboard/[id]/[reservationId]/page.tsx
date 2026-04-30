@@ -3,7 +3,12 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { getReservation } from '@/lib/db'
+import TxtSection from '@/components/TxtSection'
+import MossosSection from '@/components/MossosSection'
+
+const db = supabaseAdmin ?? supabase
 
 export default async function ReservationPage({
   params,
@@ -21,6 +26,12 @@ export default async function ReservationPage({
 
   const res = await getReservation(reservationId)
   if (!res || res.propertyId !== id) redirect(`/dashboard/${id}`)
+
+  const { data: checkinRecord } = await db
+    .from('checkin_records')
+    .select('txt_content, txt_filename, pdf_base64, mossos_sent')
+    .eq('reservation_id', reservationId)
+    .maybeSingle()
 
   const nights = res.nights ?? Math.ceil(
     (new Date(res.checkOut).getTime() - new Date(res.checkIn).getTime()) / (1000 * 60 * 60 * 24)
@@ -97,7 +108,7 @@ export default async function ReservationPage({
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">
           Estado Mossos
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-5">
           <StatusRow
             label="Formulario rellenado"
             status={res.checkinStatus?.formComplete ? 'ok' : 'pending'}
@@ -105,32 +116,35 @@ export default async function ReservationPage({
               ? 'El huésped ha completado el formulario de check-in'
               : 'El huésped aún no ha completado el formulario de check-in'}
           />
-          <StatusRow
-            label="Fichero .txt generado"
-            status={res.checkinStatus?.txtGenerated ? 'ok' : 'pending'}
-            description={res.checkinStatus?.txtGenerated
-              ? `Fichero generado${res.checkinStatus ? '' : ''}`
-              : 'Pendiente de generación'}
-          />
-          <StatusRow
-            label="Enviado a Mossos"
-            status={res.checkinStatus?.mossosSent ? 'ok' : 'pending'}
-            description={res.checkinStatus?.mossosSent
-              ? `Enviado${res.checkinStatus.sentAt ? ` el ${new Date(res.checkinStatus.sentAt).toLocaleDateString('es-ES')}` : ''}`
-              : 'Pendiente de envío'}
-          />
-        </div>
-
-        <div className="mt-6 pt-5 border-t border-gray-100 flex flex-wrap gap-2">
-          <button disabled className="px-4 py-2 bg-gray-100 text-slate-400 text-sm font-medium rounded-lg cursor-not-allowed">
-            Enviar enlace al huésped
-          </button>
-          <button disabled className="px-4 py-2 bg-gray-100 text-slate-400 text-sm font-medium rounded-lg cursor-not-allowed">
-            Generar .txt
-          </button>
-          <button disabled className="px-4 py-2 bg-gray-100 text-slate-400 text-sm font-medium rounded-lg cursor-not-allowed">
-            Enviar a Mossos
-          </button>
+          <div>
+            <StatusRow
+              label="Fichero .txt"
+              status={res.checkinStatus?.txtGenerated ? 'ok' : 'pending'}
+              description={res.checkinStatus?.txtGenerated
+                ? checkinRecord?.txt_filename ?? 'Fichero disponible'
+                : 'Sin fichero .txt'}
+            />
+            <TxtSection
+              reservationId={reservationId}
+              txtContent={checkinRecord?.txt_content ?? null}
+              txtFilename={checkinRecord?.txt_filename ?? null}
+            />
+          </div>
+          <div>
+            <StatusRow
+              label="Enviado a Mossos"
+              status={res.checkinStatus?.mossosSent ? 'ok' : 'pending'}
+              description={res.checkinStatus?.mossosSent
+                ? `Enviado${res.checkinStatus.sentAt ? ` el ${new Date(res.checkinStatus.sentAt).toLocaleDateString('es-ES')}` : ''}`
+                : 'Pendiente de envío'}
+            />
+            <MossosSection
+              reservationId={reservationId}
+              hasTxt={res.checkinStatus?.txtGenerated ?? false}
+              pdfBase64={checkinRecord?.pdf_base64 ?? null}
+              mossosSent={checkinRecord?.mossos_sent ?? false}
+            />
+          </div>
         </div>
       </div>
     </div>
