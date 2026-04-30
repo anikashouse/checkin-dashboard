@@ -81,7 +81,7 @@ export async function getReservations(propertyId: string): Promise<Reservation[]
     .eq('property_id', propertyId)
     .order('check_in', { ascending: true })
   if (error) { console.error('getReservations:', error); return [] }
-  return attachCheckinStatuses(data.map(rowToReservation))
+  return attachCheckinStatuses(data.map((r: any) => rowToReservation(r)))
 }
 
 export async function getReservationsByProperties(propertyIds: string[]): Promise<Reservation[]> {
@@ -92,7 +92,7 @@ export async function getReservationsByProperties(propertyIds: string[]): Promis
     .in('property_id', propertyIds)
     .order('check_in', { ascending: true })
   if (error) { console.error('getReservationsByProperties:', error); return [] }
-  return attachCheckinStatuses(data.map(rowToReservation))
+  return attachCheckinStatuses(data.map((r: any) => rowToReservation(r)))
 }
 
 export async function getAllReservations(): Promise<Reservation[]> {
