@@ -13,6 +13,8 @@ interface Services {
   drive_folder_id: string
 }
 
+type DriveStatus = { ok?: boolean; message?: string; error?: string; uploaded?: number }
+
 const empty: Services = {
   email_enabled: false,
   email: '',
@@ -28,6 +30,9 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [driveStatus, setDriveStatus] = useState<DriveStatus | null>(null)
+  const [driveTesting, setDriveTesting] = useState(false)
+  const [driveSyncing, setDriveSyncing] = useState(false)
 
   useEffect(() => {
     fetch('/api/user-services')
@@ -37,6 +42,34 @@ export default function ServicesPage() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  async function testDrive() {
+    setDriveTesting(true)
+    setDriveStatus(null)
+    try {
+      const res = await fetch('/api/mossos/drive-test')
+      const data = await res.json()
+      setDriveStatus(data)
+    } catch {
+      setDriveStatus({ error: 'Error de red' })
+    } finally {
+      setDriveTesting(false)
+    }
+  }
+
+  async function syncDrive() {
+    setDriveSyncing(true)
+    setDriveStatus(null)
+    try {
+      const res = await fetch('/api/mossos/drive-sync', { method: 'POST' })
+      const data = await res.json()
+      setDriveStatus(data)
+    } catch {
+      setDriveStatus({ error: 'Error de red' })
+    } finally {
+      setDriveSyncing(false)
+    }
+  }
 
   async function save() {
     setSaving(true)
@@ -201,6 +234,27 @@ export default function ServicesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
               </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={testDrive}
+                  disabled={driveTesting || !form.drive_folder_id}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-40"
+                >
+                  {driveTesting ? 'Probando...' : 'Probar conexión'}
+                </button>
+                <button
+                  onClick={syncDrive}
+                  disabled={driveSyncing || !form.drive_folder_id}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-40"
+                >
+                  {driveSyncing ? 'Sincronizando...' : 'Sincronizar todo'}
+                </button>
+              </div>
+              {driveStatus && (
+                <div className={`text-xs rounded-lg p-3 ${driveStatus.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  {driveStatus.message ?? driveStatus.error}
+                </div>
+              )}
             </div>
           )}
         </div>
