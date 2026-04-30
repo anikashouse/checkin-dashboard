@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 interface Services {
@@ -26,7 +27,11 @@ const empty: Services = {
 }
 
 export default function ServicesPage() {
+  const searchParams = useSearchParams()
+  const driveParam = searchParams.get('drive')
+
   const [form, setForm] = useState<Services>(empty)
+  const [driveConnected, setDriveConnected] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -38,7 +43,10 @@ export default function ServicesPage() {
     fetch('/api/user-services')
       .then(r => r.json())
       .then(d => {
-        if (d.services) setForm({ ...empty, ...d.services })
+        if (d.services) {
+          setForm({ ...empty, ...d.services })
+          setDriveConnected(!!d.services.google_refresh_token)
+        }
       })
       .finally(() => setLoading(false))
   }, [])
@@ -234,22 +242,42 @@ export default function ServicesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
               </div>
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={testDrive}
-                  disabled={driveTesting || !form.drive_folder_id}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-40"
+              <div className="flex flex-wrap gap-2 pt-1 items-center">
+                <a
+                  href="/api/auth/drive-connect"
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border flex items-center gap-1.5 ${driveConnected ? 'border-green-300 text-green-700 bg-green-50' : 'border-orange-300 text-orange-700 hover:bg-orange-50'}`}
                 >
-                  {driveTesting ? 'Probando...' : 'Probar conexión'}
-                </button>
-                <button
-                  onClick={syncDrive}
-                  disabled={driveSyncing || !form.drive_folder_id}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-40"
-                >
-                  {driveSyncing ? 'Sincronizando...' : 'Sincronizar todo'}
-                </button>
+                  {driveConnected ? '✓ Google Drive conectado' : 'Conectar Google Drive'}
+                </a>
+                {driveConnected && (
+                  <>
+                    <button
+                      onClick={testDrive}
+                      disabled={driveTesting || !form.drive_folder_id}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-40"
+                    >
+                      {driveTesting ? 'Probando...' : 'Probar conexión'}
+                    </button>
+                    <button
+                      onClick={syncDrive}
+                      disabled={driveSyncing || !form.drive_folder_id}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-40"
+                    >
+                      {driveSyncing ? 'Sincronizando...' : 'Sincronizar todo'}
+                    </button>
+                  </>
+                )}
               </div>
+              {driveParam === 'connected' && !driveStatus && (
+                <div className="text-xs rounded-lg p-3 bg-green-50 text-green-700 border border-green-200">
+                  ✓ Google Drive conectado correctamente
+                </div>
+              )}
+              {driveParam === 'error' && !driveStatus && (
+                <div className="text-xs rounded-lg p-3 bg-red-50 text-red-700 border border-red-200">
+                  Error al conectar Google Drive. Inténtalo de nuevo.
+                </div>
+              )}
               {driveStatus && (
                 <div className={`text-xs rounded-lg p-3 space-y-1 ${driveStatus.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                   <p>{driveStatus.message ?? driveStatus.error}</p>
