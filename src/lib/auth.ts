@@ -7,13 +7,20 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      authorization: {
+        params: {
+          scope: 'openid email profile https://www.googleapis.com/auth/drive.file',
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
     }),
   ],
   pages: {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       try {
         if (!supabaseAdmin) {
           console.error('Supabase admin client not initialized')
@@ -25,6 +32,8 @@ export const authOptions: NextAuthOptions = {
           .select('id')
           .eq('email', user.email!)
           .maybeSingle()
+
+        let userId: string | null = existingUser?.id ?? null
 
         if (!existingUser) {
           const { data: newUser, error } = await supabaseAdmin
@@ -42,10 +51,17 @@ export const authOptions: NextAuthOptions = {
             return false
           }
 
-          return !!newUser
+          userId = newUser?.id ?? null
         }
 
-        return true
+        if (userId && account?.refresh_token) {
+          await supabaseAdmin.from('user_services').upsert({
+            user_id: userId,
+            google_refresh_token: account.refresh_token,
+          }, { onConflict: 'user_id', ignoreDuplicates: false })
+        }
+
+        return !!userId
       } catch (error) {
         console.error('Sign in error:', error)
         return false

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
+import { uploadToDrive } from '@/lib/google-drive'
 
 const db = supabaseAdmin ?? supabase
 
@@ -44,6 +45,51 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('[mossos/complete] error:', error)
       return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
+    }
+
+    // Upload to Google Drive if configured
+    try {
+      const { data: services } = await db
+        .from('user_services')
+        .select('drive_enabled, drive_folder_id, google_refresh_token')
+        .eq('drive_enabled', true)
+        .not('drive_folder_id', 'is', null)
+        .not('google_refresh_token', 'is', null)
+        .maybeSingle()
+
+      if (services?.drive_folder_id && services?.google_refresh_token) {
+        const baseName = filename?.replace(/\.pdf$/i, '') ?? recordId
+
+        if (pdfBase64) {
+          await uploadToDrive({
+            folderId: services.drive_folder_id,
+            filename: filename ?? `comprovant_${baseName}.pdf`,
+            content: Buffer.from(pdfBase64, 'base64'),
+            mimeType: 'application/pdf',
+            refreshToken: services.google_refresh_token,
+          })
+          console.log('[mossos/complete] PDF subido a Drive')
+        }
+
+        const { data: record } = await db
+          .from('checkin_records')
+          .select('txt_content, txt_filename')
+          .eq('reservation_id', recordId)
+          .maybeSingle()
+
+        if (record?.txt_content) {
+          await uploadToDrive({
+            folderId: services.drive_folder_id,
+            filename: record.txt_filename ?? `mossos_${baseName}.txt`,
+            content: record.txt_content,
+            mimeType: 'text/plain',
+            refreshToken: services.google_refresh_token,
+          })
+          console.log('[mossos/complete] TXT subido a Drive')
+        }
+      }
+    } catch (driveErr) {
+      console.error('[mossos/complete] Drive upload error:', driveErr)
     }
 
     return NextResponse.json({ ok: true }, { headers: corsHeaders })
