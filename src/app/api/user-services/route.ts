@@ -28,11 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { userId, email_enabled, email, telegram_enabled, telegram_token, telegram_chat_id, drive_enabled, drive_folder_id } = body
-
-    if (userId !== sessionUserId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const { email_enabled, email, telegram_enabled, telegram_token, telegram_chat_id, drive_enabled, drive_folder_id } = body
 
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 })
@@ -42,7 +38,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabaseAdmin
       .from('user_services')
       .select('id')
-      .eq('user_id', userId)
+      .eq('user_id', sessionUserId)
       .maybeSingle()
 
     if (existing) {
@@ -58,7 +54,7 @@ export async function POST(request: NextRequest) {
           drive_enabled,
           drive_folder_id: drive_folder_id || null,
         })
-        .eq('user_id', userId)
+        .eq('user_id', sessionUserId)
 
       if (error) {
         console.error('Error updating services:', error)
@@ -69,7 +65,7 @@ export async function POST(request: NextRequest) {
       const { error } = await supabaseAdmin
         .from('user_services')
         .insert({
-          user_id: userId,
+          user_id: sessionUserId,
           email_enabled,
           email: email || null,
           telegram_enabled,

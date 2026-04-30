@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 
 interface Services {
   email_enabled: boolean
@@ -25,7 +24,6 @@ const empty: Services = {
 }
 
 export default function ServicesPage() {
-  const { data: session } = useSession()
   const [form, setForm] = useState<Services>(empty)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -41,14 +39,13 @@ export default function ServicesPage() {
   }, [])
 
   async function save() {
-    if (!session?.user?.id) return
     setSaving(true)
     setMessage('')
     try {
       const res = await fetch('/api/user-services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: session.user.id, ...form }),
+        body: JSON.stringify(form),
       })
       setMessage(res.ok ? 'Guardado correctamente' : 'Error al guardar')
     } catch {
