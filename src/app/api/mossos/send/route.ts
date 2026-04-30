@@ -22,39 +22,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No .txt file found for this reservation' }, { status: 400 })
   }
 
-  const mossosUrl = process.env.MOSSOS_API_URL
-  const mossosUser = process.env.MOSSOS_USER
-  const mossosPass = process.env.MOSSOS_PASS
-
-  if (!mossosUrl) {
-    return NextResponse.json({ error: 'MOSSOS_API_URL not configured' }, { status: 500 })
-  }
+  const ghPat = process.env.GH_DISPATCH_PAT
+  if (!ghPat) return NextResponse.json({ error: 'GH_DISPATCH_PAT not configured' }, { status: 500 })
 
   const filename = record.txt_filename || 'mossos.txt'
-  const blob = new Blob([record.txt_content], { type: 'text/plain' })
-  const fd = new FormData()
-  fd.append('file', blob, filename)
-  if (mossosUser) fd.append('user', mossosUser)
-  if (mossosPass) fd.append('password', mossosPass)
+  const content  = Buffer.from(record.txt_content).toString('base64')
+  const dashboardUrl = process.env.NEXTAUTH_URL?.replace('http://localhost:3000', 'https://checkin-dashboard-eight.vercel.app')
+    ?? 'https://checkin-dashboard-eight.vercel.app'
+  const callbackSecret = process.env.MOSSOS_CALLBACK_SECRET ?? ''
 
-  const mossosRes = await fetch(mossosUrl, { method: 'POST', body: fd })
+  const ghRes = await fetch('https://api.github.com/repos/anikashouse/airbnb_chekin/dispatches', {
+    method: 'POST',
+    headers: {
+      'Authorization': `token ${ghPat}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      event_type: 'mossos-upload',
+      client_payload: {
+        filename,
+        content,
+        recordId: reservationId,
+        dashboardUrl,
+        accessToken: callbackSecret,
+      },
+    }),
+  })
 
-  if (!mossosRes.ok) {
-    const text = await mossosRes.text()
-    return NextResponse.json({ error: `Mossos API error: ${mossosRes.status} ${text}` }, { status: 502 })
+  if (!ghRes.ok) {
+    const text = await ghRes.text()
+    return NextResponse.json({ error: `GitHub dispatch failed: ${ghRes.status} ${text}` }, { status: 502 })
   }
 
-  const pdfBuffer = await mossosRes.arrayBuffer()
-  const pdfBase64 = Buffer.from(pdfBuffer).toString('base64')
-
-  const { error } = await db.from('checkin_records').update({
-    pdf_base64: pdfBase64,
-    mossos_sent: true,
-    sent_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }).eq('reservation_id', reservationId)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ ok: true, pdfBase64 })
+  return NextResponse.json({ ok: true, message: 'Enviando a Mossos vía GitHub Actions…' })
 }

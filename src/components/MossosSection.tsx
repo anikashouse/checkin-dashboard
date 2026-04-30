@@ -41,8 +41,7 @@ export default function MossosSection({ reservationId, hasTxt, pdfBase64, mossos
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      if (data.pdfBase64) downloadPdf(data.pdfBase64)
-      router.refresh()
+      setError('Enviando a Mossos vía GitHub Actions… El estado se actualizará en 1-2 minutos.')
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -109,7 +108,11 @@ export default function MossosSection({ reservationId, hasTxt, pdfBase64, mossos
         className="hidden"
         onChange={e => { const f = e.target.files?.[0]; if (f) uploadPdf(f) }}
       />
-      {error && <p className="text-xs text-red-600 w-full">{error}</p>}
+      {error && (
+        <p className={`text-xs w-full ${error.startsWith('Enviando') ? 'text-orange-600' : 'text-red-600'}`}>
+          {error}
+        </p>
+      )}
     </div>
   )
 }
