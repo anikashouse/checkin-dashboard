@@ -6,9 +6,9 @@ export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get('state')
   const error = request.nextUrl.searchParams.get('error')
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+  const baseUrl = process.env.APP_URL
+    ?? process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    ?? 'https://checkin-dashboard-eight.vercel.app'
 
   if (error || !code || !userId) {
     return NextResponse.redirect(`${baseUrl}/dashboard/settings/services?drive=error`)

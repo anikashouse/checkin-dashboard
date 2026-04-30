@@ -6,9 +6,9 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+  const baseUrl = process.env.APP_URL
+    ?? process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    ?? 'https://checkin-dashboard-eight.vercel.app'
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
