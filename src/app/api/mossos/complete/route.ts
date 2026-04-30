@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       airbnb_code: resRow?.airbnb_code ?? recordId.split('-').slice(1).join('-'),
       pdf_base64: pdfBase64 ?? null,
       mossos_sent: true,
-      mossos_status: 'sent',
+      mossos_status: 'uploaded',
       sent_at: now,
       updated_at: now,
     }, { onConflict: 'reservation_id' })
