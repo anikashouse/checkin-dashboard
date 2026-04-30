@@ -4,13 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { Property } from '@/lib/types'
 
-const PROPERTY_COLORS = [
-  'bg-yellow-400',
-  'bg-blue-400',
-  'bg-green-400',
-  'bg-pink-400',
-  'bg-purple-400',
-]
+const FALLBACK_COLORS = ['#C8A96E','#6395D2','#5AB98C','#D26E9B','#9B78D2']
 
 export default function SidebarNav({ properties }: { properties: Property[] }) {
   const pathname = usePathname()
@@ -32,7 +26,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
               active ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${PROPERTY_COLORS[idx % PROPERTY_COLORS.length]}`} />
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.coverColor ?? FALLBACK_COLORS[idx % FALLBACK_COLORS.length] }} />
             <span className="text-sm truncate">{p.name}</span>
           </Link>
         )

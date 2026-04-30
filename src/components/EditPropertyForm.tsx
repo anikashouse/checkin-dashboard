@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+const PALETTE = [
+  '#C8A96E','#6395D2','#5AB98C','#D26E9B','#9B78D2',
+  '#E08060','#54A8C7','#D4A853','#7DB87D','#C47DB8',
+]
+
 interface Props {
   property: {
     id: string
@@ -10,6 +15,7 @@ interface Props {
     address?: string
     ical_url?: string
     mossos_id?: string
+    coverColor?: string
   }
 }
 
@@ -18,10 +24,11 @@ export default function EditPropertyForm({ property }: Props) {
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
   const [form, setForm]       = useState({
-    name:      property.name      ?? '',
-    address:   property.address   ?? '',
-    ical_url:  property.ical_url  ?? '',
-    mossos_id: property.mossos_id ?? '',
+    name:        property.name        ?? '',
+    address:     property.address     ?? '',
+    ical_url:    property.ical_url    ?? '',
+    mossos_id:   property.mossos_id   ?? '',
+    cover_color: property.coverColor  ?? PALETTE[0],
   })
   const router = useRouter()
 
@@ -106,6 +113,23 @@ export default function EditPropertyForm({ property }: Props) {
                   placeholder="ID50044239"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-2">Color</label>
+                <div className="flex flex-wrap gap-2">
+                  {PALETTE.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setForm({ ...form, cover_color: color })}
+                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
+                      style={{
+                        backgroundColor: color,
+                        borderColor: form.cover_color === color ? '#1e293b' : 'transparent',
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 

@@ -13,12 +13,21 @@ interface CalendarProps {
 
 // RGB values so we can use them in rgba() backgrounds and solid borders
 const BLOCK_COLORS = [
-  { r: 200, g: 169, b: 110 }, // warm golden
-  { r:  99, g: 149, b: 210 }, // blue
-  { r:  90, g: 185, b: 140 }, // green
-  { r: 210, g: 110, b: 155 }, // pink
-  { r: 155, g: 120, b: 210 }, // purple
+  { r: 200, g: 169, b: 110 },
+  { r:  99, g: 149, b: 210 },
+  { r:  90, g: 185, b: 140 },
+  { r: 210, g: 110, b: 155 },
+  { r: 155, g: 120, b: 210 },
 ]
+
+function hexToRgb(hex: string): RGB {
+  const h = hex.replace('#', '')
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  }
+}
 
 const monthNames = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -93,7 +102,9 @@ export default function Calendar({ reservations, properties, year, month }: Cale
   const colorByProperty = useMemo(() => {
     const map: Record<string, RGB> = {}
     if (properties && properties.length > 0) {
-      properties.forEach((p, idx) => { map[p.id] = BLOCK_COLORS[idx % BLOCK_COLORS.length] })
+      properties.forEach((p, idx) => {
+        map[p.id] = p.coverColor ? hexToRgb(p.coverColor) : BLOCK_COLORS[idx % BLOCK_COLORS.length]
+      })
     }
     return map
   }, [properties])

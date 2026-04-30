@@ -12,10 +12,11 @@ export async function PUT(
     const { error } = await supabase
       .from('properties')
       .update({
-        name:      body.name,
-        address:   body.address,
-        ical_url:  body.ical_url,
-        mossos_id: body.mossos_id,
+        name:        body.name,
+        address:     body.address,
+        ical_url:    body.ical_url,
+        mossos_id:   body.mossos_id,
+        cover_color: body.cover_color ?? null,
       })
       .eq('id', id)
 
