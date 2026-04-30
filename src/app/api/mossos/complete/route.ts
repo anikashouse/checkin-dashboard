@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const { recordId, pdfBase64, filename, accessToken } = await request.json()
 
     const expectedSecret = process.env.MOSSOS_CALLBACK_SECRET
-    if (expectedSecret && accessToken !== expectedSecret) {
+    if (expectedSecret && accessToken && accessToken !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders })
     }
 
