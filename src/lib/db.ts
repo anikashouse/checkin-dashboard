@@ -18,7 +18,7 @@ function rowToProperty(row: any): Property {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function rowToReservation(row: any, checkinStatus?: CheckinStatus): Reservation {
+function rowToReservation(row: any): Reservation {
   return {
     id:            row.id,
     propertyId:    row.property_id,
@@ -30,7 +30,6 @@ function rowToReservation(row: any, checkinStatus?: CheckinStatus): Reservation 
     guests:        row.guests,
     checkedInAt:   row.checked_in_at ?? undefined,
     tel_suffix:    row.tel_suffix ?? undefined,
-    checkinStatus,
   }
 }
 
@@ -98,7 +97,7 @@ export async function getReservationsByProperties(propertyIds: string[]): Promis
 export async function getAllReservations(): Promise<Reservation[]> {
   const { data, error } = await db.from('reservations').select('*')
   if (error) { console.error('getAllReservations:', error); return [] }
-  return data.map(rowToReservation)
+  return data.map((r: any) => rowToReservation(r))
 }
 
 export function parseIcalText(text: string): Array<{
