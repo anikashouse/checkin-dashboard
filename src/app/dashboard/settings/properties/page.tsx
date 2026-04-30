@@ -14,6 +14,7 @@ export default function PropertiesSettings() {
   const [testingId, setTestingId] = useState<string | null>(null)
   const [testResult, setTestResult] = useState<any>(null)
   const [message, setMessage] = useState('')
+  const [syncingAll, setSyncingAll] = useState(false)
 
   useEffect(() => {
     loadProperties()
@@ -104,6 +105,21 @@ export default function PropertiesSettings() {
     }
   }
 
+  async function syncAll() {
+    setSyncingAll(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/admin/properties/sync-all', { method: 'POST' })
+      const data = await res.json()
+      setMessage(data.message || 'Sync completado')
+      await loadProperties()
+    } catch {
+      setMessage('Error en sync')
+    } finally {
+      setSyncingAll(false)
+    }
+  }
+
   async function syncProperty(propertyId: string) {
     try {
       const res = await fetch('/api/admin/properties/sync', {
@@ -172,9 +188,14 @@ export default function PropertiesSettings() {
       )}
 
       {!creatingNew && (
-        <button onClick={() => setCreatingNew(true)} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">
-          + Añadir propiedad
-        </button>
+        <div className="flex gap-2 mb-6">
+          <button onClick={() => setCreatingNew(true)} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">
+            + Añadir propiedad
+          </button>
+          <button onClick={syncAll} disabled={syncingAll} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
+            {syncingAll ? 'Sincronizando...' : '↻ Sync All'}
+          </button>
+        </div>
       )}
 
       <div className="space-y-3">
