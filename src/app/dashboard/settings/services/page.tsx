@@ -13,7 +13,7 @@ interface Services {
   drive_folder_id: string
 }
 
-type DriveStatus = { ok?: boolean; message?: string; error?: string; uploaded?: number }
+type DriveStatus = { ok?: boolean; message?: string; error?: string; uploaded?: number; errors?: string[] }
 
 const empty: Services = {
   email_enabled: false,
