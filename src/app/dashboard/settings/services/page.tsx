@@ -136,7 +136,7 @@ export default function ServicesPage() {
               </div>
               <div>
                 <h2 className="font-semibold text-slate-900">Email</h2>
-                <p className="text-xs text-slate-400">Envío de enlace de check-in al huésped</p>
+                <p className="text-xs text-slate-400">Enlace de check-in al huésped + .txt y PDF al anfitrión</p>
               </div>
             </div>
             <button
