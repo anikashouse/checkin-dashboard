@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
   const base64 = Buffer.from(buffer).toString('base64')
 
   const { error } = await db.from('checkin_records').upsert({
+    id: crypto.randomUUID(),
     reservation_id: reservationId,
     airbnb_code: reservationId.split('-').slice(1).join('-'),
     pdf_base64: base64,

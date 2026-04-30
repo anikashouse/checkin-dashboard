@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString()
     const { error } = await db.from('checkin_records').upsert({
+      id: crypto.randomUUID(),
       reservation_id: reservation.id,
       airbnb_code: airbnbCode.toUpperCase(),
       guest_data: guestData ?? null,

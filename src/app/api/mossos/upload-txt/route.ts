@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
   const txtContent = await file.text()
 
   const { error } = await db.from('checkin_records').upsert({
+    id: crypto.randomUUID(),
     reservation_id: reservationId,
     airbnb_code: reservationId.split('-').slice(1).join('-'),
     txt_content: txtContent,
