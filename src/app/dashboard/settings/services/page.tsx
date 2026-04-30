@@ -251,8 +251,11 @@ export default function ServicesPage() {
                 </button>
               </div>
               {driveStatus && (
-                <div className={`text-xs rounded-lg p-3 ${driveStatus.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                  {driveStatus.message ?? driveStatus.error}
+                <div className={`text-xs rounded-lg p-3 space-y-1 ${driveStatus.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  <p>{driveStatus.message ?? driveStatus.error}</p>
+                  {driveStatus.errors?.map((e: string, i: number) => (
+                    <p key={i} className="font-mono opacity-80">• {e}</p>
+                  ))}
                 </div>
               )}
             </div>
