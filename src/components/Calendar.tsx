@@ -88,6 +88,8 @@ function ReservationBlock({ item }: { item: BlockItem }) {
 
 export default function Calendar({ reservations, properties, year, month }: CalendarProps) {
   const [view, setView] = useState<'month' | 'week'>('month')
+  const [displayYear, setDisplayYear] = useState(year)
+  const [displayMonth, setDisplayMonth] = useState(month)
   const [weekStart, setWeekStart] = useState<Date>(() => {
     const today = new Date()
     const day = (today.getDay() + 6) % 7
@@ -110,8 +112,8 @@ export default function Calendar({ reservations, properties, year, month }: Cale
   }, [properties])
 
   // ── Month ────────────────────────────────────────────────────
-  const monthStart     = new Date(year, month, 1)
-  const monthEnd       = new Date(year, month + 1, 0)
+  const monthStart     = new Date(displayYear, displayMonth, 1)
+  const monthEnd       = new Date(displayYear, displayMonth + 1, 0)
   const daysInMonth    = monthEnd.getDate()
   const firstDayOfWeek = (monthStart.getDay() + 6) % 7
   const totalCells     = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7
@@ -128,7 +130,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const co = parseLocalDate(res.checkOut)
       return co > monthStart && ci <= monthEnd
     })
-  }, [reservations, year, month])
+  }, [reservations, displayYear, displayMonth])
 
   const dayMap = useMemo(() => {
     const map: Record<number, BlockItem[]> = {}
@@ -149,7 +151,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       }
     })
     return map
-  }, [relevantReservations, year, month])
+  }, [relevantReservations, displayYear, displayMonth])
 
   // ── Week ─────────────────────────────────────────────────────
   const weekEnd = useMemo(() => {
@@ -195,7 +197,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <h2 className="text-base font-bold text-slate-900">
-            {view === 'month' ? `${monthNames[month]} de ${year}` : weekLabel}
+            {view === 'month' ? `${monthNames[displayMonth]} de ${displayYear}` : weekLabel}
           </h2>
           <div className="flex items-center gap-1">
             {(['month', 'week'] as const).map(v => (
@@ -213,28 +215,43 @@ export default function Calendar({ reservations, properties, year, month }: Cale
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => view === 'week' && setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() - 7); return n })}
+            onClick={() => {
+              if (view === 'week') {
+                setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() - 7); return n })
+              } else {
+                setDisplayMonth(m => { if (m === 0) { setDisplayYear(y => y - 1); return 11 } return m - 1 })
+              }
+            }}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-gray-100 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          {view === 'week' && (
-            <button
-              onClick={() => {
-                const today = new Date()
+          <button
+            onClick={() => {
+              const today = new Date()
+              if (view === 'week') {
                 const day = (today.getDay() + 6) % 7
                 const d = new Date(today); d.setDate(today.getDate() - day); d.setHours(0,0,0,0)
                 setWeekStart(d)
-              }}
-              className="px-2.5 py-1 text-xs font-medium text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-            >
-              Hoy
-            </button>
-          )}
+              } else {
+                setDisplayYear(today.getFullYear())
+                setDisplayMonth(today.getMonth())
+              }
+            }}
+            className="px-2.5 py-1 text-xs font-medium text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+          >
+            Hoy
+          </button>
           <button
-            onClick={() => view === 'week' && setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() + 7); return n })}
+            onClick={() => {
+              if (view === 'week') {
+                setWeekStart(d => { const n = new Date(d); n.setDate(n.getDate() + 7); return n })
+              } else {
+                setDisplayMonth(m => { if (m === 11) { setDisplayYear(y => y + 1); return 0 } return m + 1 })
+              }
+            }}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-gray-100 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +274,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       {view === 'month' && (
         <div className="grid grid-cols-7 gap-1">
           {calendarDays.map((day, idx) => {
-            const dayStr  = day ? `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}` : ''
+            const dayStr  = day ? `${displayYear}-${String(displayMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}` : ''
             const isToday = dayStr === todayStr
             const items   = day ? (dayMap[day] || []) : []
             return (
