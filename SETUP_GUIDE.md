@@ -14,6 +14,7 @@ indicators: form filled, .txt generated, sent to Mossos.
 [✓] Multi-tenancy (each user sees only their data)
 [✓] Dashboard layout (sidebar + calendar + property cards)
 [✓] Calendar with reservations per property (check-in/check-out indicators)
+[✓] Calendar month/week navigation (arrows + Hoy button, both views)
 [✓] Calendar colors pinned per property (consistent across all views)
 [✓] Property detail pages (clickable from sidebar)
 [✓] Properties settings page (add, edit, test iCal, sync)
@@ -22,7 +23,8 @@ indicators: form filled, .txt generated, sent to Mossos.
 [✓] Deployed to Vercel: checkin-dashboard-eight.vercel.app
 
 [✓] Reservation detail page (all fields + working action buttons)
-[✓] 3 Mossos status dots in reservation list (real data from checkin_records)
+[✓] 3 Mossos status dots — live data (green when done, grey when pending)
+[✓] Guest surname from form data shown in reservation lists (replaces "Reservado")
 [✓] Mossos integration: .txt upload → GitHub Actions robot → PDF comprobante
 [✓] Services management page (/dashboard/settings/services)
 [✓] Telegram config (token + chat ID)
@@ -31,6 +33,7 @@ indicators: form filled, .txt generated, sent to Mossos.
 [✓] GitHub Actions workflow (upload_mossos.yml) with Vercel bypass
 [✓] Vercel Deployment Protection bypass (x-vercel-protection-bypass)
 
+[ ] Google Drive — complete OAuth connect flow (publish app in Google Cloud Console)
 [ ] Per-property color picker
 [ ] Bulk sync all properties (one button, all iCals)
 [ ] Edit reservation fields from detail page
@@ -75,20 +78,30 @@ indicators: form filled, .txt generated, sent to Mossos.
 - [x] Property cards with pending count
 - [x] Reservation summary list split by property
 - [x] 3 status dots per reservation row (formComplete · txtGenerated · mossosSent) — live data
+- [x] Guest surname shown once form is submitted (`CODE · RIOU`)
 
-### 2.3 Property detail page (`/dashboard/[id]`) ✓
+### 2.3 Calendar ✓
+- [x] Month view and week view (toggle Mes / Semana)
+- [x] `<` `>` arrows navigate months in month view, weeks in week view
+- [x] "Hoy" button always visible — resets to current month or week
+- [x] Reservation blocks are clickable links to reservation detail
+- [x] Status dots on each calendar block (formComplete · txtGenerated · mossosSent)
+- [x] Colors stable per property (pinned from property data)
+
+### 2.4 Property detail page (`/dashboard/[id]`) ✓
 - [x] Property-specific calendar
 - [x] List of reservations for that property, sorted earliest → latest
 - [x] Each reservation clickable → reservation detail page
+- [x] Guest surname shown once form submitted
 - [x] Edit property button (modal: nombre, dirección, iCal URL, Mossos ID)
 - [x] Delete property (confirmación + cascada reservas)
 - [x] 3 Mossos status dots per reservation row
 
-### 2.4 Reservation detail page (`/dashboard/[id]/[reservationId]`) ✓
+### 2.5 Reservation detail page (`/dashboard/[id]/[reservationId]`) ✓
 - [x] All reservation fields (code, guest name, check-in, check-out, nights, guests, phone)
 - [x] 3 Mossos status indicators (real data from checkin_records)
 - [x] "Enviar enlace al huésped" — sends checkin form link to guest
-- [x] Upload .txt button — stores txt_content in checkin_records
+- [x] Upload .txt button — stores txt_content in checkin_records (overrides previous)
 - [x] "Enviar a Mossos" — triggers GitHub Actions robot, stores PDF comprobante
 - [x] Download comprobante PDF button (when available)
 - [ ] Edit reservation fields
@@ -119,26 +132,31 @@ indicators: form filled, .txt generated, sent to Mossos.
 
 ### 4.1 Guest checkin form (airbnb_chekin repo) ✓
 - [x] Separate repo at `airbnb_chekin/`
-- [x] Form data POSTed to `/api/mossos/send` → stored in `checkin_records`
+- [x] Form POSTs to `/api/mossos/checkin` → stores `guest_data` (jsonb) + txt in `checkin_records`
+- [x] `guest_data` fields per guest: `tipo, numdoc, ap1, ap2, nom, sexe, naix, nac, entrada, salida, tel, email`
+- [x] `ap1` (first surname) surfaced in dashboard reservation lists once form submitted
 - [x] Validation on required fields
 
-### 4.2 .txt file
+### 4.2 .txt file ✓
 - [x] Upload .txt via dashboard reservation page → stored as `txt_content` in `checkin_records`
-- [x] Auto-generate .txt from form data (airbnb_chekin repo)
+- [x] Uploading a new .txt overwrites the previous one (upsert on `reservation_id`)
+- [x] Auto-generate .txt from form data (airbnb_chekin repo, Mossos V24 format)
 - [x] `txt_filename` stored alongside content
-- [x] Download button in reservation detail page
+- [x] Field mapping: foreign docs use type `O` (not `D` which is Spanish DNI only)
 
 ### 4.3 Send to Mossos API ✓
-- [x] GitHub Actions workflow (`upload_mossos.yml`) polls for pending records and uploads
+- [x] GitHub Actions workflow (`upload_mossos.yml`) triggered via repository_dispatch
 - [x] `upload_mossos.js` calls Mossos API with .txt, receives PDF comprobante
 - [x] PDF stored as `pdf_base64` in `checkin_records`
 - [x] Callback to `/api/mossos/complete` marks `mossos_sent = true`, stores PDF
 - [x] Vercel Deployment Protection bypassed via `x-vercel-protection-bypass` header
-- [x] `mossos_status` values: `uploading / uploaded / error`
+- [x] `mossos_status` values: `uploading / uploaded / error` (CHECK constraint in DB)
+- [x] Dashboard notification URL uses `VERCEL_URL` (not `NEXTAUTH_URL` which was wrong)
 
 ### 4.4 Status indicators ✓
-- [x] 3 status dots in reservation list rows (Resumen + property detail)
+- [x] 3 status dots in reservation list rows (Resumen + property detail + calendar blocks)
 - [x] Real data: `formComplete`, `txtGenerated` (`txt_content` or `txt_path`), `mossosSent`
+- [x] Tooltips on hover: "✓ Formulario", "○ Sin .txt", etc.
 - [x] Download comprobante PDF in reservation detail
 
 ---
@@ -162,13 +180,21 @@ indicators: form filled, .txt generated, sent to Mossos.
 - [ ] Active use: send checkin link to guest
 
 ### 5.4 Google Drive ✓
-- [x] Folder ID input with instructions
+- [x] Folder ID input with step-by-step instructions
 - [x] Separate OAuth connect flow (`/api/auth/drive-connect` → `/api/auth/drive-callback`)
+- [x] `redirect_uri` uses stable production URL (not `VERCEL_URL` which changes per deployment)
 - [x] Stores `google_refresh_token` in `user_services` per user
-- [x] "Probar conexión" — tests folder access
+- [x] "Probar conexión" — tests folder access with stored token
 - [x] "Sincronizar todo" — bulk uploads all `mossos_sent=true` records (TXT + PDF)
 - [x] Auto-upload to Drive on each new Mossos send (`/api/mossos/complete`)
-- [ ] Add `https://checkin-dashboard-eight.vercel.app/api/auth/drive-callback` to Google Cloud OAuth redirect URIs (manual step per user)
+- [x] Uses user OAuth refresh token (not service account — service accounts have no Drive quota)
+
+**Setup steps for Drive connect (per user):**
+1. Google Cloud Console → OAuth consent screen → **Publish App** (not Testing mode)
+   - Users will see an "unverified app" warning; click Advanced → proceed to continue
+2. Add redirect URI: `https://checkin-dashboard-eight.vercel.app/api/auth/drive-callback`
+3. In Servicios → enter folder ID → click "Conectar Google Drive" → authorize
+4. Once connected, files upload automatically after each Mossos send
 
 ---
 
@@ -190,6 +216,13 @@ user_services    (id, user_id, email_enabled, email,
                   telegram_enabled, telegram_token, telegram_chat_id,
                   drive_enabled, drive_folder_id, google_refresh_token)
 ```
+
+### Key decisions
+- `checkin_records` uses upsert on `reservation_id` — uploading a new .txt always replaces the previous
+- `mossos_status` has a DB CHECK constraint: only `uploading / uploaded / error` allowed
+- Drive uses user OAuth refresh token per user (not a shared service account)
+- Google login (NextAuth) uses basic scopes only; Drive uses a separate OAuth flow with `drive.file` scope
+- `VERCEL_URL` is deployment-specific; production URLs use hardcoded fallback or `APP_URL` env var
 
 ### RLS Policies ✓
 - Properties, reservations, checkin_records: user sees only their own data
@@ -215,6 +248,7 @@ NEXTAUTH_URL                    = https://checkin-dashboard-eight.vercel.app
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 MOSSOS_CALLBACK_SECRET
+GH_DISPATCH_PAT                 = GitHub PAT to trigger mossos-upload workflow
 ```
 
 ### 7.3 Environment variables (GitHub Actions / airbnb_chekin)
@@ -237,8 +271,9 @@ SUPABASE_SERVICE_ROLE_KEY
 
 ## NEXT PRIORITIES
 
-1. Connect Google Drive for current user (add redirect URI in Google Cloud Console → click "Conectar Google Drive")
-2. Upload `ID50044239.015.txt` from correct path and send to Mossos (reservation HM35BJ3QKE)
+1. **Google Drive connect** — publish OAuth app in Google Cloud Console, then connect in Servicios
+2. **Upload HM35BJ3QKE .txt** — upload `ID50044239.015.txt` from `C:\Users\Mikel\Documents\airbnb_chekin\` and send to Mossos
 3. Per-property color picker
 4. Bulk "Sync All" properties button
 5. Edit reservation fields from detail page
+6. Telegram / Email active use (send notifications)
