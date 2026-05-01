@@ -35,6 +35,11 @@ function sexLabel(s?: string): string | undefined {
   if (s === 'F') return 'Femenino'
   return undefined
 }
+function contratoLabel(s?: string): string | undefined {
+  if (s === 'R') return 'Reserva futura'
+  if (s === 'C') return 'Check-in inmediato'
+  return undefined
+}
 
 function Field({ label, value, mono }: { label: string; value?: string; mono?: boolean }) {
   if (!value) return null
@@ -91,6 +96,17 @@ function GuestCard({ g, index }: { g: GuestData; index: number }) {
           <Field label="Entrada" value={fmtDateTime(g.entrada, g.hora_entrada)} />
           <Field label="Salida"  value={fmtDateTime(g.salida, g.hora_salida)} />
         </Section>
+
+        {(g.fecha_contrato || g.tipo_contrato || g.airbnb_code_txt || g.num_viajeros || g.num_habitaciones || g.tipo_pago) && (
+          <Section title="Reserva">
+            <Field label="Cód. Airbnb"  value={g.airbnb_code_txt} mono />
+            <Field label="Fecha contrato" value={fmtDate(g.fecha_contrato)} />
+            <Field label="Tipo contrato" value={contratoLabel(g.tipo_contrato)} />
+            <Field label="Nº viajeros"  value={g.num_viajeros} />
+            <Field label="Habitaciones" value={g.num_habitaciones} />
+            <Field label="Tipo pago"    value={g.tipo_pago} />
+          </Section>
+        )}
 
         {hasContact && (
           <Section title="Contacto">
@@ -162,7 +178,7 @@ export default async function ReservationPage({
       </div>
 
       {/* Layout */}
-      <div className="flex gap-4 items-start">
+      <div className="flex gap-4 items-stretch">
 
         {/* Left — reservation + mossos */}
         <div className="w-80 shrink-0 space-y-3">
@@ -248,7 +264,10 @@ export default async function ReservationPage({
         </div>
 
         {/* Right — guest cards */}
-        <div className="flex-1 min-w-0 space-y-3">
+        <div
+          className="flex-1 min-w-0 grid gap-3"
+          style={guests.length > 0 ? { gridTemplateRows: `repeat(${guests.length}, 1fr)` } : undefined}
+        >
           {guests.length > 0 ? (
             guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
           ) : (

@@ -12,25 +12,32 @@ export interface Property {
 }
 
 export interface GuestData {
-  // Identity
+  // Identity (pos 6-11)
   nom?: string
   ap1?: string
   ap2?: string
   sexe?: string
   naix?: string
   nac?: string
-  menor?: string        // S/N
-  // Document (pos 2/3 depending on tipo, pos 4=expedición, pos 25=soporte DNI)
+  menor?: string        // S/N — pos 21
+  // Document (pos 2/3 depending on tipo, pos 5=expedición, pos 26=soporte DNI)
   tipo?: string
   numdoc?: string
   expedicion?: string
   soporte_dni?: string
-  // Stay
+  // Stay (pos 12-15)
   entrada?: string
   hora_entrada?: string
   salida?: string
   hora_salida?: string
-  // Contact
+  // Booking metadata (pos 16-22)
+  fecha_contrato?: string
+  tipo_contrato?: string  // R=Reserva futura, C=Check-in hoy o pasado
+  airbnb_code_txt?: string
+  num_viajeros?: string
+  num_habitaciones?: string
+  tipo_pago?: string      // always PLATF
+  // Contact (pos 23, 25)
   tel?: string
   email?: string
   // Address (pos 27=calle, 28=provincia ESP, 29=municipio ESP, 30=localidad, 31=país, 32=CP)
