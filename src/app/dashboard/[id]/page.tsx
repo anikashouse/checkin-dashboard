@@ -67,11 +67,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
                 >
                   <div className="min-w-0 flex-1">
-                    <span className={`font-semibold text-sm ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
-                      {name}
-                    </span>
-                    <span className="text-slate-400 text-xs mx-2">·</span>
-                    <span className="text-xs text-slate-400">{res.airbnbCode}</span>
+                    <div>
+                      <span className={`font-semibold text-sm ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
+                        {name}
+                      </span>
+                      <span className="text-slate-400 text-xs mx-2">·</span>
+                      <span className="text-xs text-slate-400">{res.airbnbCode}</span>
+                    </div>
+                    {res.checkinStatus?.guestNom && (
+                      <div className="text-xs text-slate-400 mt-0.5">
+                        {res.checkinStatus.guestNom}
+                        {res.checkinStatus.guestNac && <span className="ml-1.5">{res.checkinStatus.guestNac}</span>}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <div className="flex gap-1">

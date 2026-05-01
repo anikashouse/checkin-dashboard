@@ -17,6 +17,8 @@ export interface CheckinStatus {
   mossosSent: boolean
   sentAt?: string
   guestSurname?: string
+  guestNom?: string
+  guestNac?: string
 }
 
 export interface Reservation {

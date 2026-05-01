@@ -90,12 +90,20 @@ export default async function Dashboard() {
                             href={`/dashboard/${res.propertyId}/${res.id}`}
                             className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
                           >
-                            <span className="text-sm text-slate-700 group-hover:text-slate-900">
-                              <span className="font-medium text-slate-900">{res.airbnbCode}</span>
-                              <span className="text-slate-400 mx-1.5">·</span>
-                              <span>{displayName}</span>
-                            </span>
-                            <div className="flex gap-1 shrink-0">
+                            <div className="min-w-0">
+                              <div className="text-sm text-slate-700 group-hover:text-slate-900">
+                                <span className="font-medium text-slate-900">{res.airbnbCode}</span>
+                                <span className="text-slate-400 mx-1.5">·</span>
+                                <span>{displayName}</span>
+                              </div>
+                              {res.checkinStatus?.guestNom && (
+                                <div className="text-xs text-slate-400 mt-0.5">
+                                  {res.checkinStatus.guestNom}
+                                  {res.checkinStatus.guestNac && <span className="ml-1.5">{res.checkinStatus.guestNac}</span>}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-1 shrink-0 ml-3">
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.formComplete ? 'bg-green-400' : 'bg-slate-300'}`} title="Formulario" />
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.txtGenerated ? 'bg-green-400' : 'bg-slate-300'}`} title=".txt" />
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.mossosSent ? 'bg-green-400' : 'bg-slate-300'}`} title="Mossos" />
