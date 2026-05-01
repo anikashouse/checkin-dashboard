@@ -82,9 +82,8 @@ export default async function Dashboard() {
                     <div>
                       {propRes.map((res) => {
                         const isReserved = !res.guestName || res.guestName.toLowerCase() === 'reserved'
-                        const displayName = isReserved
-                          ? 'Reservado'
-                          : res.guestName!.trim().split(' ').at(-1)!
+                        const displayName = res.checkinStatus?.guestSurname
+                          ?? (isReserved ? 'Reservado' : res.guestName!.trim().split(' ').at(-1)!)
                         return (
                           <Link
                             key={res.id}

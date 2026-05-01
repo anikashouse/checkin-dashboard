@@ -57,9 +57,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           <div>
             {reservations.map(res => {
               const isReserved = !res.guestName || res.guestName.toLowerCase() === 'reserved'
-              const name = isReserved
-                ? res.airbnbCode
-                : res.guestName!.trim().split(' ').at(-1)!
+              const name = res.checkinStatus?.guestSurname
+                ?? (isReserved ? res.airbnbCode : res.guestName!.trim().split(' ').at(-1)!)
               const isPast = new Date(res.checkOut) < now
               return (
                 <Link

@@ -16,6 +16,7 @@ export interface CheckinStatus {
   txtGenerated: boolean
   mossosSent: boolean
   sentAt?: string
+  guestSurname?: string
 }
 
 export interface Reservation {

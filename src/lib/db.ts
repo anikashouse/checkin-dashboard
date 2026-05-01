@@ -35,11 +35,14 @@ function rowToReservation(row: any): Reservation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function rowToCheckinStatus(row: any): CheckinStatus {
+  const guests = row.guest_data as Array<{ ap1?: string }> | null
+  const surname = guests?.[0]?.ap1 ?? undefined
   return {
-    formComplete: row.form_complete ?? false,
-    txtGenerated: !!(row.txt_path || row.txt_content),
-    mossosSent:   row.mossos_sent ?? false,
-    sentAt:       row.sent_at ?? row.completed_at ?? undefined,
+    formComplete:  row.form_complete ?? false,
+    txtGenerated:  !!(row.txt_path || row.txt_content),
+    mossosSent:    row.mossos_sent ?? false,
+    sentAt:        row.sent_at ?? row.completed_at ?? undefined,
+    guestSurname:  surname,
   }
 }
 
