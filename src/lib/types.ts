@@ -19,12 +19,12 @@ export interface GuestData {
   sexe?: string
   naix?: string
   nac?: string
-  // Document
+  menor?: string        // S/N
+  // Document (pos 2/3 depending on tipo, pos 4=expedición, pos 25=soporte DNI)
   tipo?: string
   numdoc?: string
-  suport?: string
   expedicion?: string
-  soporte?: string
+  soporte_dni?: string
   // Stay
   entrada?: string
   hora_entrada?: string
@@ -33,9 +33,11 @@ export interface GuestData {
   // Contact
   tel?: string
   email?: string
-  // Address
+  // Address (pos 27=calle, 28=provincia ESP, 29=municipio ESP, 30=localidad, 31=país, 32=CP)
   direccion?: string
-  municipio?: string
+  provincia?: string
+  municipio?: string    // ESP only
+  localidad?: string    // non-ESP
   pais_residencia?: string
   cp?: string
 }
