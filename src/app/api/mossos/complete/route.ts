@@ -38,12 +38,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'recordId required' }, { status: 400, headers: corsHeaders })
     }
 
-    const { data: resRow } = await db.from('reservations').select('property_id, airbnb_code').eq('id', recordId).maybeSingle()
+    // recordId may be a UUID (from old flow) or an Airbnb code (from index.html dispatch)
+    let resRow: { property_id: string; airbnb_code: string } | null = null
+    let resolvedId = recordId
+    const { data: byId } = await db.from('reservations').select('id, property_id, airbnb_code').eq('id', recordId).maybeSingle()
+    if (byId) {
+      resRow = byId
+      resolvedId = byId.id
+    } else {
+      const { data: byCode } = await db.from('reservations').select('id, property_id, airbnb_code').ilike('airbnb_code', recordId).maybeSingle()
+      if (byCode) { resRow = byCode; resolvedId = byCode.id }
+    }
 
     const now = new Date().toISOString()
     const { error } = await db.from('checkin_records').upsert({
       id: crypto.randomUUID(),
-      reservation_id: recordId,
+      reservation_id: resolvedId,
       property_id: resRow?.property_id ?? null,
       airbnb_code: resRow?.airbnb_code ?? recordId.split('-').slice(1).join('-'),
       pdf_base64: pdfBase64 ?? null,
@@ -85,7 +95,7 @@ export async function POST(request: NextRequest) {
         const { data: record } = await db
           .from('checkin_records')
           .select('txt_content, txt_filename')
-          .eq('reservation_id', recordId)
+          .eq('reservation_id', resolvedId)
           .maybeSingle()
 
         if (record?.txt_content) {
