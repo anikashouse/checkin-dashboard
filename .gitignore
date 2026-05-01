@@ -42,3 +42,6 @@ client_secret_*.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Private docs
+SETUP_GUIDE.md
