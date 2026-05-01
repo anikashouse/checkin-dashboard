@@ -17,7 +17,7 @@ async function sendTelegramDocument(buffer: Buffer, filename: string, caption: s
   const fd = new FormData()
   fd.append('chat_id', chatId)
   fd.append('caption', caption)
-  fd.append('document', new Blob([buffer]), filename)
+  fd.append('document', new Blob([new Uint8Array(buffer)]), filename)
   await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: fd })
 }
 
