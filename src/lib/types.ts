@@ -12,23 +12,32 @@ export interface Property {
 }
 
 export interface GuestData {
+  // Identity
+  nom?: string
+  ap1?: string
+  ap2?: string
+  sexe?: string
+  naix?: string
+  nac?: string
+  // Document
   tipo?: string
   numdoc?: string
   suport?: string
   expedicion?: string
   soporte?: string
-  ap1?: string
-  ap2?: string
-  nom?: string
-  sexe?: string
-  naix?: string
-  nac?: string
+  // Stay
   entrada?: string
   hora_entrada?: string
   salida?: string
   hora_salida?: string
+  // Contact
   tel?: string
   email?: string
+  // Address
+  direccion?: string
+  municipio?: string
+  pais_residencia?: string
+  cp?: string
 }
 
 export interface CheckinStatus {

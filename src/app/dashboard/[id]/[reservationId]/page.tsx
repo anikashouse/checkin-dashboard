@@ -7,8 +7,97 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { getReservation } from '@/lib/db'
 import TxtSection from '@/components/TxtSection'
 import MossosSection from '@/components/MossosSection'
+import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
+
+function fmtDate(s?: string) {
+  if (!s || s.length !== 8) return s ?? '—'
+  return `${s.slice(6,8)}/${s.slice(4,6)}/${s.slice(0,4)}`
+}
+function fmtTime(s?: string) {
+  if (!s || s.length < 4) return ''
+  return ` ${s.slice(0,2)}:${s.slice(2,4)}`
+}
+function docLabel(tipo?: string) {
+  return ({ D: 'DNI', N: 'NIE', P: 'Pasaporte', O: 'Otro doc.' } as Record<string,string>)[tipo ?? ''] ?? tipo ?? '—'
+}
+function soporteLabel(s?: string) {
+  return ({ C: 'Chip', B: 'Cód. barras', M: 'Manual' } as Record<string,string>)[s ?? ''] ?? s ?? '—'
+}
+function sexLabel(s?: string) {
+  return s === 'M' ? 'Masculino' : s === 'F' ? 'Femenino' : s ?? '—'
+}
+
+function Field({ label, value, mono }: { label: string; value?: string; mono?: boolean }) {
+  if (!value) return null
+  return (
+    <div>
+      <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-0.5">{label}</dt>
+      <dd className={`text-sm text-slate-900 ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-2">{title}</p>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3">{children}</dl>
+    </div>
+  )
+}
+
+function GuestCard({ g, index }: { g: GuestData; index: number }) {
+  const fullName = [g.nom, g.ap1, g.ap2].filter(Boolean).join(' ') || `Huésped ${index + 1}`
+  const hasDoc     = g.numdoc || g.suport || g.expedicion || g.soporte
+  const hasContact = g.tel || g.email
+  const hasAddress = g.direccion || g.municipio || g.cp || g.pais_residencia
+
+  const addressLine = [g.direccion, [g.cp, g.municipio].filter(Boolean).join(' '), g.pais_residencia].filter(Boolean).join(', ')
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Card header */}
+      <div className="px-5 py-4 bg-slate-50 border-b border-gray-100">
+        <p className="font-bold text-slate-900 text-base">{fullName}</p>
+        <p className="text-xs text-slate-400 mt-0.5">
+          {[sexLabel(g.sexe), g.nac, g.naix ? fmtDate(g.naix) : null].filter(Boolean).join(' · ')}
+        </p>
+      </div>
+
+      <div className="px-5 py-4 space-y-5">
+        {hasDoc && (
+          <Section title="Documento">
+            <Field label={docLabel(g.tipo)} value={g.numdoc} mono />
+            <Field label="Nº soporte" value={g.suport} mono />
+            <Field label="Expedición" value={fmtDate(g.expedicion)} />
+            <Field label="Lectura" value={soporteLabel(g.soporte)} />
+          </Section>
+        )}
+
+        <Section title="Estancia">
+          <Field label="Entrada" value={`${fmtDate(g.entrada)}${fmtTime(g.hora_entrada)}`} />
+          <Field label="Salida"  value={`${fmtDate(g.salida)}${fmtTime(g.hora_salida)}`} />
+        </Section>
+
+        {hasContact && (
+          <Section title="Contacto">
+            <Field label="Teléfono" value={g.tel} />
+            <Field label="Email" value={g.email} />
+          </Section>
+        )}
+
+        {hasAddress && (
+          <div>
+            <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-2">Dirección</p>
+            <p className="text-sm text-slate-900 font-medium">{addressLine}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default async function ReservationPage({
   params,
@@ -38,8 +127,7 @@ export default async function ReservationPage({
   )
 
   const guestName = res.guestName && res.guestName.toLowerCase() !== 'reserved'
-    ? res.guestName
-    : null
+    ? res.guestName : null
 
   const guests = res.checkinStatus?.guests ?? []
 
@@ -48,7 +136,7 @@ export default async function ReservationPage({
       {/* Back */}
       <Link
         href={`/dashboard/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 transition-colors mb-6"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -57,37 +145,30 @@ export default async function ReservationPage({
       </Link>
 
       {/* Title */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          {guestName ?? res.airbnbCode}
-        </h1>
-        {guestName && (
-          <p className="text-slate-400 text-sm mt-1">{res.airbnbCode}</p>
-        )}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">{guestName ?? res.airbnbCode}</h1>
+        {guestName && <p className="text-slate-400 text-sm mt-1">{res.airbnbCode}</p>}
       </div>
 
-      {/* Two-column layout */}
-      <div className="flex gap-6 items-center justify-center">
+      {/* Layout */}
+      <div className="flex gap-6 items-start">
 
-        {/* Left column */}
-        <div className="flex-1 min-w-0 space-y-4">
+        {/* Left — reservation + mossos */}
+        <div className="w-96 shrink-0 space-y-4">
 
-          {/* Reservation details */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">
-              Detalles de la reserva
-            </h2>
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-5">
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">Detalles de la reserva</h2>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <dt className="text-xs text-slate-400 mb-1">Check-in</dt>
                 <dd className="font-semibold text-slate-900 text-sm">
-                  {new Date(res.checkIn).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {new Date(res.checkIn).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-400 mb-1">Check-out</dt>
                 <dd className="font-semibold text-slate-900 text-sm">
-                  {new Date(res.checkOut).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {new Date(res.checkOut).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                 </dd>
               </div>
               <div>
@@ -100,29 +181,26 @@ export default async function ReservationPage({
               </div>
               {res.tel_suffix && (
                 <div>
-                  <dt className="text-xs text-slate-400 mb-1">Teléfono (últimos 4)</dt>
+                  <dt className="text-xs text-slate-400 mb-1">Tel (últimos 4)</dt>
                   <dd className="font-semibold text-slate-900">···{res.tel_suffix}</dd>
                 </div>
               )}
               <div>
                 <dt className="text-xs text-slate-400 mb-1">Propiedad</dt>
-                <dd className="font-semibold text-slate-900">{property.name}</dd>
+                <dd className="font-semibold text-slate-900 text-xs leading-tight">{property.name}</dd>
               </div>
             </dl>
           </div>
 
-          {/* Mossos status */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">
-              Estado Mossos
-            </h2>
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">Estado Mossos</h2>
             <div className="space-y-5">
               <StatusRow
                 label="Formulario rellenado"
                 status={res.checkinStatus?.formComplete ? 'ok' : 'pending'}
                 description={res.checkinStatus?.formComplete
-                  ? 'El huésped ha completado el formulario de check-in'
-                  : 'El huésped aún no ha completado el formulario de check-in'}
+                  ? 'Formulario completado por el huésped'
+                  : 'El huésped aún no ha completado el formulario'}
               />
               <div>
                 <StatusRow
@@ -156,46 +234,24 @@ export default async function ReservationPage({
             </div>
           </div>
 
-        </div>{/* end left column */}
+        </div>
 
-        {/* Right column — guest data */}
-        <div className="w-72 shrink-0">
+        {/* Right — guest cards */}
+        <div className="flex-1 min-w-0 space-y-4">
           {guests.length > 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">
-                Datos de los huéspedes
-              </h2>
-              <div className="space-y-5">
-                {guests.map((g, i) => (
-                  <div key={i} className={i > 0 ? 'pt-5 border-t border-gray-100' : ''}>
-                    <p className="text-sm font-semibold text-slate-900 mb-3">
-                      {[g.nom, g.ap1, g.ap2].filter(Boolean).join(' ') || `Huésped ${i + 1}`}
-                    </p>
-                    <dl className="space-y-2">
-                      {g.nac && <div><dt className="text-xs text-slate-400">Nacionalidad</dt><dd className="text-sm font-medium text-slate-900">{g.nac}</dd></div>}
-                      {g.sexe && <div><dt className="text-xs text-slate-400">Sexo</dt><dd className="text-sm font-medium text-slate-900">{g.sexe === 'M' ? 'Masculino' : g.sexe === 'F' ? 'Femenino' : g.sexe}</dd></div>}
-                      {g.naix && <div><dt className="text-xs text-slate-400">Fecha nacimiento</dt><dd className="text-sm font-medium text-slate-900">{g.naix.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}</dd></div>}
-                      {g.numdoc && <div><dt className="text-xs text-slate-400">Documento ({g.tipo})</dt><dd className="text-sm font-medium text-slate-900 font-mono">{g.numdoc}</dd></div>}
-                      {g.suport && <div><dt className="text-xs text-slate-400">Nº soporte</dt><dd className="text-sm font-medium text-slate-900 font-mono">{g.suport}</dd></div>}
-                      {g.expedicion && <div><dt className="text-xs text-slate-400">Fecha expedición</dt><dd className="text-sm font-medium text-slate-900">{g.expedicion.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}</dd></div>}
-                      {g.soporte && <div><dt className="text-xs text-slate-400">Tipo soporte</dt><dd className="text-sm font-medium text-slate-900">{g.soporte}</dd></div>}
-                      {g.entrada && <div><dt className="text-xs text-slate-400">Entrada</dt><dd className="text-sm font-medium text-slate-900">{g.entrada.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}{g.hora_entrada ? ` ${g.hora_entrada.slice(0,2)}:${g.hora_entrada.slice(2)}` : ''}</dd></div>}
-                      {g.salida && <div><dt className="text-xs text-slate-400">Salida</dt><dd className="text-sm font-medium text-slate-900">{g.salida.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}{g.hora_salida ? ` ${g.hora_salida.slice(0,2)}:${g.hora_salida.slice(2)}` : ''}</dd></div>}
-                      {g.tel && <div><dt className="text-xs text-slate-400">Teléfono</dt><dd className="text-sm font-medium text-slate-900">{g.tel}</dd></div>}
-                      {g.email && <div><dt className="text-xs text-slate-400">Email</dt><dd className="text-sm font-medium text-slate-900 break-all">{g.email}</dd></div>}
-                    </dl>
-                  </div>
-                ))}
-              </div>
-            </div>
+            guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
           ) : (
-            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-6 text-center">
-              <p className="text-xs text-slate-400">Sube un .txt para ver los datos de los huéspedes</p>
+            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-10 flex flex-col items-center justify-center text-center gap-2">
+              <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <p className="text-sm text-slate-400">Sin datos de huéspedes</p>
+              <p className="text-xs text-slate-300">Sube un fichero .txt para ver la información</p>
             </div>
           )}
         </div>
 
-      </div>{/* end flex row */}
+      </div>
     </div>
   )
 }
@@ -205,10 +261,7 @@ function StatusRow({ label, status, description }: {
   status: 'ok' | 'error' | 'pending'
   description: string
 }) {
-  const dot =
-    status === 'ok'    ? 'bg-green-500' :
-    status === 'error' ? 'bg-red-500'   :
-                         'bg-slate-300'
+  const dot = status === 'ok' ? 'bg-green-500' : status === 'error' ? 'bg-red-500' : 'bg-slate-300'
   return (
     <div className="flex items-start gap-3">
       <span className={`mt-0.5 w-2.5 h-2.5 rounded-full shrink-0 ${dot}`} />

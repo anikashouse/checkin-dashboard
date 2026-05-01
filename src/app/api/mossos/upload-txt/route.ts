@@ -9,24 +9,29 @@ function parseTxtGuests(txt: string) {
   return txt.split(/\r?\n/).filter(Boolean).flatMap(line => {
     const f = line.split('|')
     if (f[0] !== '2') return []
+    const trim = (v?: string) => v?.trim() || undefined
     return [{
-      tipo:         f[3] ?? '',
-      numdoc:       f[2] ?? '',
-      suport:       f[4] ?? '',
-      ap1:          f[5] ?? '',
-      ap2:          f[6] ?? '',
-      nom:          f[7] ?? '',
-      sexe:         f[8] ?? '',
-      naix:         f[9] ?? '',
-      nac:          f[10] ?? '',
-      entrada:      f[11] ?? '',
-      hora_entrada: f[12] ?? '',
-      salida:       f[13] ?? '',
-      hora_salida:  f[14] ?? '',
-      expedicion:   f[15] ?? '',
-      soporte:      f[16] ?? '',
-      tel:          f[22] ?? '',
-      email:        f[24] ?? '',
+      nom:             trim(f[7]),
+      ap1:             trim(f[5]),
+      ap2:             trim(f[6]),
+      sexe:            trim(f[8]),
+      naix:            trim(f[9]),
+      nac:             trim(f[10]),
+      tipo:            trim(f[3]),
+      numdoc:          trim(f[2]),
+      suport:          trim(f[4]),
+      expedicion:      trim(f[15]),
+      soporte:         trim(f[16]),
+      entrada:         trim(f[11]),
+      hora_entrada:    trim(f[12]),
+      salida:          trim(f[13]),
+      hora_salida:     trim(f[14]),
+      tel:             trim(f[22]),
+      email:           trim(f[24]),
+      direccion:       trim(f[26]),
+      municipio:       trim(f[29]),
+      pais_residencia: trim(f[30]),
+      cp:              trim(f[31]),
     }]
   })
 }
