@@ -1,5 +1,5 @@
 import { supabase, supabaseAdmin } from './supabase'
-import type { Property, Reservation, CheckinStatus } from './types'
+import type { Property, Reservation, CheckinStatus, GuestData } from './types'
 
 const db = supabaseAdmin ?? supabase
 
@@ -35,16 +35,14 @@ function rowToReservation(row: any): Reservation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function rowToCheckinStatus(row: any): CheckinStatus {
-  const guests = row.guest_data as Array<{ ap1?: string; nom?: string; nac?: string }> | null
-  const g0 = guests?.[0]
+  const guests = (row.guest_data ?? []) as GuestData[]
   return {
     formComplete:  row.form_complete ?? false,
     txtGenerated:  !!(row.txt_path || row.txt_content),
     mossosSent:    row.mossos_sent ?? false,
     sentAt:        row.sent_at ?? row.completed_at ?? undefined,
-    guestSurname:  g0?.ap1 || undefined,
-    guestNom:      g0?.nom || undefined,
-    guestNac:      g0?.nac || undefined,
+    guestSurname:  guests[0]?.ap1 || undefined,
+    guests:        guests.length > 0 ? guests : undefined,
   }
 }
 

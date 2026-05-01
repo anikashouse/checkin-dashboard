@@ -11,14 +11,28 @@ export interface Property {
   updated_at?: string
 }
 
+export interface GuestData {
+  tipo?: string
+  numdoc?: string
+  ap1?: string
+  ap2?: string
+  nom?: string
+  sexe?: string
+  naix?: string
+  nac?: string
+  entrada?: string
+  salida?: string
+  tel?: string
+  email?: string
+}
+
 export interface CheckinStatus {
   formComplete: boolean
   txtGenerated: boolean
   mossosSent: boolean
   sentAt?: string
   guestSurname?: string
-  guestNom?: string
-  guestNac?: string
+  guests?: GuestData[]
 }
 
 export interface Reservation {
