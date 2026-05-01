@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -16,6 +16,13 @@ export default function MossosSection({ reservationId, hasTxt, pdfBase64, mossos
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Auto-refresh while waiting for Mossos confirmation
+  useEffect(() => {
+    if (mossosSent || !hasTxt) return
+    const id = setInterval(() => router.refresh(), 15000)
+    return () => clearInterval(id)
+  }, [mossosSent, hasTxt, router])
 
   function downloadPdf(base64: string) {
     const binary = atob(base64)
@@ -68,6 +75,12 @@ export default function MossosSection({ reservationId, hasTxt, pdfBase64, mossos
 
   return (
     <div className="flex flex-wrap items-center gap-2 mt-2">
+      {hasTxt && !mossosSent && (
+        <p className="text-xs text-slate-400 w-full flex items-center gap-1.5">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+          Esperando confirmación de Mossos…
+        </p>
+      )}
       {pdfBase64 && (
         <button
           onClick={() => downloadPdf(pdfBase64)}
