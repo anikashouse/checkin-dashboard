@@ -64,7 +64,8 @@ function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
 
 function ReservationBlock({ item }: { item: BlockItem }) {
   const { r, g, b } = item.color
-  const label = item.res.airbnbCode || item.res.guestName || 'Guest'
+  const code = item.res.airbnbCode || item.res.guestName || 'Guest'
+  const surname = item.res.checkinStatus?.guestSurname
 
   return (
     <Link
@@ -76,7 +77,9 @@ function ReservationBlock({ item }: { item: BlockItem }) {
         borderRight: item.isEnd   ? `2px solid rgb(${r}, ${g}, ${b})` : undefined,
       }}
     >
-      <div className="font-semibold text-slate-900 truncate text-xs">{label}</div>
+      <div className="font-semibold text-slate-900 truncate text-xs">
+        {code}{surname ? ` · ${surname}` : ''}
+      </div>
       <div className="flex gap-0.5 mt-0.5">
         <StatusDot green={item.res.checkinStatus?.formComplete ?? false} tooltip={item.res.checkinStatus?.formComplete ? '✓ Formulario' : '○ Sin formulario'} />
         <StatusDot green={item.res.checkinStatus?.txtGenerated ?? false} tooltip={item.res.checkinStatus?.txtGenerated ? '✓ .txt generado' : '○ Sin .txt'} />

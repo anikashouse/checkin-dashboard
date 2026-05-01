@@ -5,6 +5,27 @@ import { supabaseAdmin, supabase } from '@/lib/supabase'
 
 const db = supabaseAdmin ?? supabase
 
+function parseTxtGuests(txt: string) {
+  return txt.split(/\r?\n/).filter(Boolean).flatMap(line => {
+    const f = line.split('|')
+    if (f[0] !== '2') return []
+    return [{
+      tipo:    f[3] ?? '',
+      numdoc:  f[2] ?? '',
+      ap1:     f[5] ?? '',
+      ap2:     f[6] ?? '',
+      nom:     f[7] ?? '',
+      sexe:    f[8] ?? '',
+      naix:    f[9] ?? '',
+      nac:     f[10] ?? '',
+      entrada: f[11] ?? '',
+      salida:  f[13] ?? '',
+      tel:     f[22] ?? '',
+      email:   f[24] ?? '',
+    }]
+  })
+}
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,6 +39,7 @@ export async function POST(request: NextRequest) {
   }
 
   const txtContent = await file.text()
+  const guestData = parseTxtGuests(txtContent)
 
   const { data: res } = await db.from('reservations').select('property_id, airbnb_code').eq('id', reservationId).maybeSingle()
   if (!res) return NextResponse.json({ error: 'Reservation not found' }, { status: 404 })
@@ -29,6 +51,7 @@ export async function POST(request: NextRequest) {
     airbnb_code: res.airbnb_code,
     txt_content: txtContent,
     txt_filename: file.name,
+    guest_data: guestData.length > 0 ? guestData : null,
     form_complete: true,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'reservation_id' })
