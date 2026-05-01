@@ -67,7 +67,7 @@ export default async function ReservationPage({
       </div>
 
       {/* Two-column layout */}
-      <div className="flex gap-6 items-start">
+      <div className="flex gap-6 items-center justify-center">
 
         {/* Left column */}
         <div className="flex-1 min-w-0 space-y-4">
@@ -176,6 +176,11 @@ export default async function ReservationPage({
                       {g.sexe && <div><dt className="text-xs text-slate-400">Sexo</dt><dd className="text-sm font-medium text-slate-900">{g.sexe === 'M' ? 'Masculino' : g.sexe === 'F' ? 'Femenino' : g.sexe}</dd></div>}
                       {g.naix && <div><dt className="text-xs text-slate-400">Fecha nacimiento</dt><dd className="text-sm font-medium text-slate-900">{g.naix.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}</dd></div>}
                       {g.numdoc && <div><dt className="text-xs text-slate-400">Documento ({g.tipo})</dt><dd className="text-sm font-medium text-slate-900 font-mono">{g.numdoc}</dd></div>}
+                      {g.suport && <div><dt className="text-xs text-slate-400">Nº soporte</dt><dd className="text-sm font-medium text-slate-900 font-mono">{g.suport}</dd></div>}
+                      {g.expedicion && <div><dt className="text-xs text-slate-400">Fecha expedición</dt><dd className="text-sm font-medium text-slate-900">{g.expedicion.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}</dd></div>}
+                      {g.soporte && <div><dt className="text-xs text-slate-400">Tipo soporte</dt><dd className="text-sm font-medium text-slate-900">{g.soporte}</dd></div>}
+                      {g.entrada && <div><dt className="text-xs text-slate-400">Entrada</dt><dd className="text-sm font-medium text-slate-900">{g.entrada.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}{g.hora_entrada ? ` ${g.hora_entrada.slice(0,2)}:${g.hora_entrada.slice(2)}` : ''}</dd></div>}
+                      {g.salida && <div><dt className="text-xs text-slate-400">Salida</dt><dd className="text-sm font-medium text-slate-900">{g.salida.replace(/(\d{4})(\d{2})(\d{2})/, '$3/$2/$1')}{g.hora_salida ? ` ${g.hora_salida.slice(0,2)}:${g.hora_salida.slice(2)}` : ''}</dd></div>}
                       {g.tel && <div><dt className="text-xs text-slate-400">Teléfono</dt><dd className="text-sm font-medium text-slate-900">{g.tel}</dd></div>}
                       {g.email && <div><dt className="text-xs text-slate-400">Email</dt><dd className="text-sm font-medium text-slate-900 break-all">{g.email}</dd></div>}
                     </dl>

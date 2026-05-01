@@ -14,6 +14,9 @@ export interface Property {
 export interface GuestData {
   tipo?: string
   numdoc?: string
+  suport?: string
+  expedicion?: string
+  soporte?: string
   ap1?: string
   ap2?: string
   nom?: string
@@ -21,7 +24,9 @@ export interface GuestData {
   naix?: string
   nac?: string
   entrada?: string
+  hora_entrada?: string
   salida?: string
+  hora_salida?: string
   tel?: string
   email?: string
 }

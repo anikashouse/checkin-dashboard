@@ -10,18 +10,23 @@ function parseTxtGuests(txt: string) {
     const f = line.split('|')
     if (f[0] !== '2') return []
     return [{
-      tipo:    f[3] ?? '',
-      numdoc:  f[2] ?? '',
-      ap1:     f[5] ?? '',
-      ap2:     f[6] ?? '',
-      nom:     f[7] ?? '',
-      sexe:    f[8] ?? '',
-      naix:    f[9] ?? '',
-      nac:     f[10] ?? '',
-      entrada: f[11] ?? '',
-      salida:  f[13] ?? '',
-      tel:     f[22] ?? '',
-      email:   f[24] ?? '',
+      tipo:         f[3] ?? '',
+      numdoc:       f[2] ?? '',
+      suport:       f[4] ?? '',
+      ap1:          f[5] ?? '',
+      ap2:          f[6] ?? '',
+      nom:          f[7] ?? '',
+      sexe:         f[8] ?? '',
+      naix:         f[9] ?? '',
+      nac:          f[10] ?? '',
+      entrada:      f[11] ?? '',
+      hora_entrada: f[12] ?? '',
+      salida:       f[13] ?? '',
+      hora_salida:  f[14] ?? '',
+      expedicion:   f[15] ?? '',
+      soporte:      f[16] ?? '',
+      tel:          f[22] ?? '',
+      email:        f[24] ?? '',
     }]
   })
 }
