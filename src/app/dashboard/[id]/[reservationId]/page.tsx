@@ -159,7 +159,7 @@ export default async function ReservationPage({
   const guests = res.checkinStatus?.guests ?? []
 
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col h-full">
       {/* Back */}
       <Link
         href={`/dashboard/${id}`}
@@ -178,7 +178,7 @@ export default async function ReservationPage({
       </div>
 
       {/* Layout */}
-      <div className="flex gap-4 items-stretch">
+      <div className="flex gap-4 flex-1 min-h-0">
 
         {/* Left — reservation + mossos */}
         <div className="w-80 shrink-0 space-y-3">
