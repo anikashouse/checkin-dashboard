@@ -49,6 +49,7 @@ type BlockItem = {
   color: RGB
   isStart: boolean
   isEnd: boolean
+  isPast: boolean
 }
 
 function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
@@ -72,12 +73,12 @@ function ReservationBlock({ item }: { item: BlockItem }) {
       href={`/dashboard/${item.res.propertyId}/${item.res.id}`}
       className="block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter]"
       style={{
-        backgroundColor: `rgba(${r}, ${g}, ${b}, 0.125)`,
-        borderLeft:  item.isStart ? `2px solid rgb(${r}, ${g}, ${b})` : '2px solid transparent',
-        borderRight: item.isEnd   ? `2px solid rgb(${r}, ${g}, ${b})` : undefined,
+        backgroundColor: `rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.055 : 0.125})`,
+        borderLeft:  item.isStart ? `2px solid rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.35 : 1})` : '2px solid transparent',
+        borderRight: item.isEnd   ? `2px solid rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.35 : 1})` : undefined,
       }}
     >
-      <div className="font-semibold text-slate-900 truncate text-xs">
+      <div className={`font-semibold truncate text-xs ${item.isPast ? 'text-slate-400' : 'text-slate-900'}`}>
         {code}{surname ? ` · ${surname}` : ''}
       </div>
       <div className="flex gap-0.5 mt-0.5">
@@ -141,6 +142,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
+      const isPast = res.checkOut < todayStr
       const lastNight = new Date(checkOut)
       lastNight.setDate(lastNight.getDate() - 1)
       let cur = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
@@ -148,7 +150,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       while (cur < checkOut && cur <= monthEnd) {
         const d = cur.getDate()
         if (!map[d]) map[d] = []
-        map[d].push({ res, color, isStart: toDateStr(cur) === res.checkIn, isEnd: toDateStr(cur) === toDateStr(lastNight) })
+        map[d].push({ res, color, isPast, isStart: toDateStr(cur) === res.checkIn, isEnd: toDateStr(cur) === toDateStr(lastNight) })
         cur = new Date(cur)
         cur.setDate(cur.getDate() + 1)
       }
@@ -173,12 +175,13 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
+      const isPast = res.checkOut < todayStr
       const lastNight = new Date(checkOut); lastNight.setDate(lastNight.getDate() - 1)
       weekDays.forEach(day => {
         if (day >= checkIn && day < checkOut) {
           const dayStr = toDateStr(day)
           if (!map[dayStr]) map[dayStr] = []
-          map[dayStr].push({ res, color, isStart: dayStr === res.checkIn, isEnd: dayStr === toDateStr(lastNight) })
+          map[dayStr].push({ res, color, isPast, isStart: dayStr === res.checkIn, isEnd: dayStr === toDateStr(lastNight) })
         }
       })
     })
