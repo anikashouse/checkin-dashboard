@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
-import { uploadToDrive } from '@/lib/google-drive'
+import { uploadToDrive, getOrCreateFolder } from '@/lib/google-drive'
 
 const db = supabaseAdmin ?? supabase
 
@@ -35,10 +35,18 @@ export async function POST() {
   for (const rec of records) {
     const base = rec.airbnb_code ?? rec.reservation_id
 
+    let subFolderId: string
+    try {
+      subFolderId = await getOrCreateFolder(services.drive_folder_id, base, services.google_refresh_token)
+    } catch (e: unknown) {
+      errors.push(`Folder ${base}: ${e instanceof Error ? e.message : String(e)}`)
+      continue
+    }
+
     if (rec.txt_content) {
       try {
         await uploadToDrive({
-          folderId: services.drive_folder_id,
+          folderId: subFolderId,
           filename: rec.txt_filename ?? `mossos_${base}.txt`,
           content: rec.txt_content,
           mimeType: 'text/plain',
@@ -53,7 +61,7 @@ export async function POST() {
     if (rec.pdf_base64) {
       try {
         await uploadToDrive({
-          folderId: services.drive_folder_id,
+          folderId: subFolderId,
           filename: `comprovant_${base}.pdf`,
           content: Buffer.from(rec.pdf_base64, 'base64'),
           mimeType: 'application/pdf',
