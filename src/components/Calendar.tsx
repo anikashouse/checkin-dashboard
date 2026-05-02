@@ -124,9 +124,9 @@ function ReservationBlock({ item }: { item: BlockItem }) {
       }}
     >
       <div className={`font-semibold truncate text-xs ${URGENCY_STYLES[u].text}`}>
-        {u === 'active'  && '· '}
-        {u === 'soon'    && '· '}
-        {u === 'overdue' && '· '}
+        {u === 'active'  && '⚠ '}
+        {u === 'soon'    && '⏰ '}
+        {u === 'overdue' && '⚡ '}
         {code}{surname ? ` · ${surname}` : ''}
       </div>
       <div className="flex gap-0.5 mt-0.5">
