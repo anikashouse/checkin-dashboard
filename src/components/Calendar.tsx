@@ -74,9 +74,9 @@ const URGENCY_STYLES: Record<BlockItem['urgency'], {
 }> = {
   done:    { bg: '0.055', border: '0.35', text: 'text-slate-400' },
   normal:  { bg: '0.125', border: '1',    text: 'text-slate-900' },
-  soon:    { bg: 'amber', border: 'amber', text: 'text-amber-800' },
-  active:  { bg: 'red',   border: 'red',   text: 'text-red-800', pulse: true },
-  overdue: { bg: 'red',   border: 'red',   text: 'text-red-700' },
+  soon:    { bg: 'amber', border: 'amber', text: 'text-amber-700' },
+  active:  { bg: 'red',   border: 'red',   text: 'text-red-600' },
+  overdue: { bg: 'red',   border: 'red',   text: 'text-red-500' },
 }
 
 function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
@@ -98,9 +98,9 @@ function ReservationBlock({ item }: { item: BlockItem }) {
 
   // Property colour blocks for done/normal; fixed colours for urgent states
   const bgStyle   = u === 'done'    ? `rgba(${r},${g},${b},0.055)`
-                  : u === 'soon'    ? 'rgba(251,191,36,0.18)'
-                  : u === 'active'  ? 'rgba(239,68,68,0.12)'
-                  : u === 'overdue' ? 'rgba(239,68,68,0.10)'
+                  : u === 'soon'    ? 'rgba(251,191,36,0.15)'
+                  : u === 'active'  ? 'rgba(239,68,68,0.07)'
+                  : u === 'overdue' ? 'rgba(239,68,68,0.06)'
                   :                   `rgba(${r},${g},${b},0.125)`
 
   const borderRgb = u === 'soon'    ? '251,146,60'
@@ -108,12 +108,15 @@ function ReservationBlock({ item }: { item: BlockItem }) {
                   : u === 'overdue' ? '220,38,38'
                   :                   `${r},${g},${b}`
 
-  const borderAlpha = u === 'done' ? '0.35' : '1'
+  const borderAlpha = u === 'done'    ? '0.35'
+                    : u === 'active'  ? '0.5'
+                    : u === 'overdue' ? '0.45'
+                    :                   '1'
 
   return (
     <Link
       href={`/dashboard/${item.res.propertyId}/${item.res.id}`}
-      className={`block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter] ${u === 'active' ? 'ring-1 ring-red-400 ring-inset' : ''}`}
+      className={`block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter] ${u === 'active' ? 'ring-1 ring-red-300 ring-inset' : ''}`}
       style={{
         backgroundColor: bgStyle,
         borderLeft:  item.isStart ? `2px solid rgba(${borderRgb},${borderAlpha})` : '2px solid transparent',
@@ -121,9 +124,9 @@ function ReservationBlock({ item }: { item: BlockItem }) {
       }}
     >
       <div className={`font-semibold truncate text-xs ${URGENCY_STYLES[u].text}`}>
-        {u === 'active'  && '⚠ '}
-        {u === 'soon'    && '⏰ '}
-        {u === 'overdue' && '⚡ '}
+        {u === 'active'  && '· '}
+        {u === 'soon'    && '· '}
+        {u === 'overdue' && '· '}
         {code}{surname ? ` · ${surname}` : ''}
       </div>
       <div className="flex gap-0.5 mt-0.5">
