@@ -10,181 +10,109 @@ export function SetupForm({ userId }: { userId: string }) {
   const [step, setStep] = useState<Step>('property')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [propertyCreated, setPropertyCreated] = useState(false)
 
   const [propertyData, setPropertyData] = useState({
     name: '',
-    address: '',
-    city: '',
     ical_url: '',
     mossos_id: '',
   })
 
-  const [servicesData, setServicesData] = useState({
-    email_enabled: false,
-    email: '',
-    telegram_enabled: false,
-    telegram_token: '',
-    telegram_chat_id: '',
-    drive_enabled: false,
-    drive_folder_id: '',
-  })
-
-  const handleCreateProperty = async (e: React.FormEvent) => {
+  async function handleCreateProperty(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     try {
-      const response = await fetch('/api/properties', {
+      const res = await fetch('/api/properties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...propertyData,
-          userId,
-        }),
+        body: JSON.stringify({ ...propertyData, userId }),
       })
-
-      if (!response.ok) {
-        throw new Error('Error creating property')
-      }
-
-      setPropertyCreated(true)
+      if (!res.ok) throw new Error('Error al crear la propiedad')
       setStep('services')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creating property')
+      setError(err instanceof Error ? err.message : 'Error al crear la propiedad')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleSaveServices = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch('/api/user-services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          ...servicesData,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Error saving services')
-      }
-
-      router.push('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving services')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSkip = () => {
-    router.push('/dashboard')
   }
 
   return (
     <div className="w-full">
-      {/* Step 1: Create Property */}
+
+      {/* ── Step 1: Property ── */}
       {step === 'property' && (
-        <form onSubmit={handleCreateProperty} className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Agrega tu primera propiedad</h2>
-            <p className="text-slate-600 mb-6">O salta este paso y hazlo más tarde</p>
+        <form onSubmit={handleCreateProperty} className="space-y-5">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-slate-900">Tu primera propiedad</h2>
+            <p className="text-sm text-slate-500 mt-1">Podrás añadir más desde Ajustes → Propiedades</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              Nombre de la propiedad
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+              Nombre <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={propertyData.name}
-              onChange={(e) => setPropertyData({ ...propertyData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Mi apartamento en Barcelona"
+              onChange={e => setPropertyData({ ...propertyData, name: e.target.value })}
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="Apartamento 12 min Sagrada Família"
+              required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              Dirección
-            </label>
-            <input
-              type="text"
-              value={propertyData.address}
-              onChange={(e) => setPropertyData({ ...propertyData, address: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Calle Principal, 123"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              Ciudad
-            </label>
-            <input
-              type="text"
-              value={propertyData.city}
-              onChange={(e) => setPropertyData({ ...propertyData, city: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Barcelona"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              URL del calendario iCal
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+              iCal URL de Airbnb <span className="text-red-500">*</span>
             </label>
             <input
               type="url"
               value={propertyData.ical_url}
-              onChange={(e) => setPropertyData({ ...propertyData, ical_url: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="https://airbnb.com/calendar/..."
+              onChange={e => setPropertyData({ ...propertyData, ical_url: e.target.value })}
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="https://www.airbnb.es/calendar/ical/..."
+              required
             />
-            <p className="text-sm text-slate-500 mt-1">
-              Obtén esta URL en Airbnb: Anuncio → Calendario → Exportar
+            <p className="text-xs text-slate-400 mt-1.5">
+              Airbnb → Tu anuncio → Calendario → Exportar calendario
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-2">
-              ID de Mossos (opcional)
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+              ID Mossos
+              <span className="ml-1.5 font-normal normal-case text-slate-400">(opcional)</span>
             </label>
             <input
               type="text"
               value={propertyData.mossos_id}
-              onChange={(e) => setPropertyData({ ...propertyData, mossos_id: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tu ID de Mossos"
+              onChange={e => setPropertyData({ ...propertyData, mossos_id: e.target.value })}
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="ID50044239"
             />
+            <p className="text-xs text-slate-400 mt-1.5">
+              Número de establecimiento del Registre de Viatgers (Mossos d'Esquadra)
+            </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
               disabled={loading || !propertyData.name || !propertyData.ical_url}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Creando...' : 'Crear propiedad'}
+              {loading ? 'Creando...' : 'Continuar'}
             </button>
             <button
               type="button"
-              onClick={handleSkip}
-              className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-colors"
+              onClick={() => router.push('/dashboard')}
+              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors"
             >
               Saltar
             </button>
@@ -192,119 +120,68 @@ export function SetupForm({ userId }: { userId: string }) {
         </form>
       )}
 
-      {/* Step 2: Configure Services */}
+      {/* ── Step 2: Services ── */}
       {step === 'services' && (
-        <form onSubmit={handleSaveServices} className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Configura tus servicios</h2>
-            <p className="text-slate-600 mb-6">Selecciona cómo quieres recibir notificaciones</p>
-          </div>
-
-          {/* Email */}
-          <div className="border border-slate-200 rounded-lg p-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={servicesData.email_enabled}
-                onChange={(e) => setServicesData({ ...servicesData, email_enabled: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium text-slate-900">Email</span>
-            </label>
-            {servicesData.email_enabled && (
-              <div className="mt-3 ml-8">
-                <input
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={servicesData.email}
-                  onChange={(e) => setServicesData({ ...servicesData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-sm"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Telegram */}
-          <div className="border border-slate-200 rounded-lg p-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={servicesData.telegram_enabled}
-                onChange={(e) => setServicesData({ ...servicesData, telegram_enabled: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium text-slate-900">Telegram</span>
-            </label>
-            {servicesData.telegram_enabled && (
-              <div className="mt-3 ml-8 space-y-2">
-                <input
-                  type="text"
-                  placeholder="Bot Token"
-                  value={servicesData.telegram_token}
-                  onChange={(e) => setServicesData({ ...servicesData, telegram_token: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-sm"
-                />
-                <input
-                  type="text"
-                  placeholder="Chat ID"
-                  value={servicesData.telegram_chat_id}
-                  onChange={(e) => setServicesData({ ...servicesData, telegram_chat_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-sm"
-                />
-              </div>
-            )}
+        <div className="space-y-5">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-slate-900">Conecta tus servicios</h2>
+            <p className="text-sm text-slate-500 mt-1">Puedes configurarlo todo más tarde en Ajustes → Servicios</p>
           </div>
 
           {/* Google Drive */}
-          <div className="border border-slate-200 rounded-lg p-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={servicesData.drive_enabled}
-                onChange={(e) => setServicesData({ ...servicesData, drive_enabled: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium text-slate-900">Google Drive</span>
-            </label>
-            {servicesData.drive_enabled && (
-              <div className="mt-3 ml-8">
-                <input
-                  type="text"
-                  placeholder="Folder ID"
-                  value={servicesData.drive_folder_id}
-                  onChange={(e) => setServicesData({ ...servicesData, drive_folder_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-sm"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  Encuentra el ID en la URL: drive.google.com/drive/folders/[ID]
+          <div className="border border-slate-200 rounded-xl p-5">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-slate-900 text-sm">Google Drive</p>
+                <p className="text-xs text-slate-400 mt-0.5">Backup automático de ficheros .txt y PDF de Mossos</p>
+                <a
+                  href="/api/auth/drive-connect"
+                  className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Conectar con Google
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Telegram */}
+          <div className="border border-slate-200 rounded-xl p-5">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.032 9.569c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.48 14.48l-2.95-.924c-.64-.203-.654-.64.136-.948l11.527-4.444c.537-.194 1.006.131.37.084z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-slate-900 text-sm">Telegram</p>
+                <p className="text-xs text-slate-400 mt-0.5">Notificaciones de check-in y envío de ficheros</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  Configurable en <span className="font-medium text-slate-600">Ajustes → Servicios</span> después del setup
                 </p>
               </div>
-            )}
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
             </div>
-          )}
+          </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-2">
             <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              onClick={() => router.push('/dashboard')}
+              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Guardando...' : 'Completar configuración'}
-            </button>
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-colors"
-            >
-              Más tarde
+              Ir al dashboard
             </button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   )
