@@ -49,4 +49,19 @@ with both repos airbnb_checkin and checkin-dashboard, So the path forward is: do
 
 Pon los estados de reserva en calendario tambien
 
-cuando haya la info del huesped, solo muestra apellido. 
+cuando haya la info del huesped, solo muestra apellido.
+
+## Calendar reservation urgency states
+
+Each reservation block in the calendar is colour-coded by urgency:
+
+| State | Condition | Visual |
+|-------|-----------|--------|
+| **done** | Checkout past + all 3 checks green (form ✓, txt ✓, Mossos ✓) | Dimmed — low opacity, muted text |
+| **normal** | Future reservation, or form already filled | Property colour at full opacity |
+| **⏰ soon** | Check-in within 3 days AND form not yet filled | Amber background |
+| **⚠ active** | Guest currently staying AND form not filled | Red background + ring outline |
+| **⚡ overdue** | Checkout already passed AND files still missing | Red background, no ring |
+
+Logic lives in `getUrgency()` in `src/components/Calendar.tsx`.
+The 3-day "soon" window is hardcoded — change `daysUntil <= 3` to adjust. 
