@@ -142,7 +142,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
-      const isPast = res.checkOut < todayStr
+      const isPast = res.checkOut < todayStr && (res.checkinStatus?.mossosSent ?? false)
       const lastNight = new Date(checkOut)
       lastNight.setDate(lastNight.getDate() - 1)
       let cur = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
@@ -175,7 +175,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
-      const isPast = res.checkOut < todayStr
+      const isPast = res.checkOut < todayStr && (res.checkinStatus?.mossosSent ?? false)
       const lastNight = new Date(checkOut); lastNight.setDate(lastNight.getDate() - 1)
       weekDays.forEach(day => {
         if (day >= checkIn && day < checkOut) {
