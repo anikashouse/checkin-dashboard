@@ -91,7 +91,7 @@ export async function POST(request: Request) {
 
         if (!error) updated++
       } else if (!globalCodes.has(event.airbnbCode)) {
-        // Insert only if not duplicate in any property
+        // Insert — not in any property yet
         const { error } = await supabase.from('reservations').insert({
           id: `${propertyId}-${event.airbnbCode}`,
           property_id: propertyId,
@@ -105,6 +105,23 @@ export async function POST(request: Request) {
         })
 
         if (!error) inserted++
+      } else {
+        // Exists in a different property — reassign to this one (iCal was swapped)
+        const { error } = await supabase
+          .from('reservations')
+          .update({
+            property_id: propertyId,
+            guest_name: event.guestName,
+            check_in: event.checkIn,
+            check_out: event.checkOut,
+            nights: event.nights,
+            guests: event.guests,
+            tel_suffix: event.tel_suffix || null,
+          })
+          .eq('airbnb_code', event.airbnbCode)
+          .neq('property_id', propertyId)
+
+        if (!error) updated++
       }
     }
 

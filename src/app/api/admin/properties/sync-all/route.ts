@@ -86,6 +86,18 @@ export async function POST() {
             tel_suffix: event.tel_suffix || null,
           })
           if (!error) { inserted++; globalCodes.add(event.airbnbCode) }
+        } else {
+          // Exists in a different property — reassign (iCal was swapped)
+          const { error } = await db.from('reservations').update({
+            property_id: prop.id,
+            guest_name: event.guestName,
+            check_in: event.checkIn,
+            check_out: event.checkOut,
+            nights: event.nights,
+            guests: event.guests,
+            tel_suffix: event.tel_suffix || null,
+          }).eq('airbnb_code', event.airbnbCode).neq('property_id', prop.id)
+          if (!error) updated++
         }
       }
 
