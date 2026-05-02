@@ -51,16 +51,15 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString()
-    const { error } = await db.from('checkin_records').upsert({
-      id: crypto.randomUUID(),
-      reservation_id: resolvedId,
-      property_id: resRow?.property_id ?? null,
-      airbnb_code: resRow?.airbnb_code ?? recordId.split('-').slice(1).join('-'),
-      pdf_base64: pdfBase64 ?? null,
-      mossos_sent: true,
-      sent_at: now,
-      updated_at: now,
-    }, { onConflict: 'reservation_id' })
+    const { error } = await db
+      .from('checkin_records')
+      .update({
+        pdf_base64: pdfBase64 ?? null,
+        mossos_sent: true,
+        sent_at: now,
+        updated_at: now,
+      })
+      .eq('reservation_id', resolvedId)
 
     if (error) {
       console.error('[mossos/complete] error:', error)
