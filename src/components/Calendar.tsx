@@ -44,12 +44,39 @@ function parseLocalDate(s: string): Date {
 }
 
 type RGB = { r: number; g: number; b: number }
+// urgency: 'done' | 'normal' | 'soon' | 'active' | 'overdue'
 type BlockItem = {
   res: Reservation
   color: RGB
   isStart: boolean
   isEnd: boolean
   isPast: boolean
+  urgency: 'done' | 'normal' | 'soon' | 'active' | 'overdue'
+}
+
+function getUrgency(res: Reservation, todayStr: string): BlockItem['urgency'] {
+  const filled = res.checkinStatus?.formComplete ?? false
+  const sent   = res.checkinStatus?.mossosSent ?? false
+  const ci = res.checkIn
+  const co = res.checkOut
+
+  if (co <= todayStr && sent)  return 'done'    // past + all green → dim
+  if (co <= todayStr && !sent) return 'overdue' // past + missing files → red
+  if (ci <= todayStr)          return filled ? 'normal' : 'active'  // currently staying
+  // future: check-in within 3 days
+  const daysUntil = (new Date(ci).getTime() - new Date(todayStr).getTime()) / 86400000
+  if (daysUntil <= 3 && !filled) return 'soon'
+  return 'normal'
+}
+
+const URGENCY_STYLES: Record<BlockItem['urgency'], {
+  bg: string; border: string; text: string; pulse?: boolean
+}> = {
+  done:    { bg: '0.055', border: '0.35', text: 'text-slate-400' },
+  normal:  { bg: '0.125', border: '1',    text: 'text-slate-900' },
+  soon:    { bg: 'amber', border: 'amber', text: 'text-amber-800' },
+  active:  { bg: 'red',   border: 'red',   text: 'text-red-800', pulse: true },
+  overdue: { bg: 'red',   border: 'red',   text: 'text-red-700' },
 }
 
 function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
@@ -65,20 +92,38 @@ function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
 
 function ReservationBlock({ item }: { item: BlockItem }) {
   const { r, g, b } = item.color
-  const code = item.res.airbnbCode || item.res.guestName || 'Guest'
+  const code    = item.res.airbnbCode || item.res.guestName || 'Guest'
   const surname = item.res.checkinStatus?.guestSurname
+  const u       = item.urgency
+
+  // Property colour blocks for done/normal; fixed colours for urgent states
+  const bgStyle   = u === 'done'    ? `rgba(${r},${g},${b},0.055)`
+                  : u === 'soon'    ? 'rgba(251,191,36,0.18)'
+                  : u === 'active'  ? 'rgba(239,68,68,0.12)'
+                  : u === 'overdue' ? 'rgba(239,68,68,0.10)'
+                  :                   `rgba(${r},${g},${b},0.125)`
+
+  const borderRgb = u === 'soon'    ? '251,146,60'
+                  : u === 'active'  ? '239,68,68'
+                  : u === 'overdue' ? '220,38,38'
+                  :                   `${r},${g},${b}`
+
+  const borderAlpha = u === 'done' ? '0.35' : '1'
 
   return (
     <Link
       href={`/dashboard/${item.res.propertyId}/${item.res.id}`}
-      className="block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter]"
+      className={`block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter] ${u === 'active' ? 'ring-1 ring-red-400 ring-inset' : ''}`}
       style={{
-        backgroundColor: `rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.055 : 0.125})`,
-        borderLeft:  item.isStart ? `2px solid rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.35 : 1})` : '2px solid transparent',
-        borderRight: item.isEnd   ? `2px solid rgba(${r}, ${g}, ${b}, ${item.isPast ? 0.35 : 1})` : undefined,
+        backgroundColor: bgStyle,
+        borderLeft:  item.isStart ? `2px solid rgba(${borderRgb},${borderAlpha})` : '2px solid transparent',
+        borderRight: item.isEnd   ? `2px solid rgba(${borderRgb},${borderAlpha})` : undefined,
       }}
     >
-      <div className={`font-semibold truncate text-xs ${item.isPast ? 'text-slate-400' : 'text-slate-900'}`}>
+      <div className={`font-semibold truncate text-xs ${URGENCY_STYLES[u].text}`}>
+        {u === 'active'  && '⚠ '}
+        {u === 'soon'    && '⏰ '}
+        {u === 'overdue' && '⚡ '}
         {code}{surname ? ` · ${surname}` : ''}
       </div>
       <div className="flex gap-0.5 mt-0.5">
@@ -142,7 +187,8 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
-      const isPast = res.checkOut < todayStr && (res.checkinStatus?.mossosSent ?? false)
+      const urgency = getUrgency(res, todayStr)
+      const isPast  = urgency === 'done'
       const lastNight = new Date(checkOut)
       lastNight.setDate(lastNight.getDate() - 1)
       let cur = new Date(Math.max(checkIn.getTime(), monthStart.getTime()))
@@ -150,7 +196,7 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       while (cur < checkOut && cur <= monthEnd) {
         const d = cur.getDate()
         if (!map[d]) map[d] = []
-        map[d].push({ res, color, isPast, isStart: toDateStr(cur) === res.checkIn, isEnd: toDateStr(cur) === toDateStr(lastNight) })
+        map[d].push({ res, color, isPast, urgency, isStart: toDateStr(cur) === res.checkIn, isEnd: toDateStr(cur) === toDateStr(lastNight) })
         cur = new Date(cur)
         cur.setDate(cur.getDate() + 1)
       }
@@ -175,13 +221,14 @@ export default function Calendar({ reservations, properties, year, month }: Cale
       const color = colorByProperty[res.propertyId] ?? BLOCK_COLORS[idx % BLOCK_COLORS.length]
       const checkIn  = parseLocalDate(res.checkIn)
       const checkOut = parseLocalDate(res.checkOut)
-      const isPast = res.checkOut < todayStr && (res.checkinStatus?.mossosSent ?? false)
+      const urgency = getUrgency(res, todayStr)
+      const isPast  = urgency === 'done'
       const lastNight = new Date(checkOut); lastNight.setDate(lastNight.getDate() - 1)
       weekDays.forEach(day => {
         if (day >= checkIn && day < checkOut) {
           const dayStr = toDateStr(day)
           if (!map[dayStr]) map[dayStr] = []
-          map[dayStr].push({ res, color, isPast, isStart: dayStr === res.checkIn, isEnd: dayStr === toDateStr(lastNight) })
+          map[dayStr].push({ res, color, isPast, urgency, isStart: dayStr === res.checkIn, isEnd: dayStr === toDateStr(lastNight) })
         }
       })
     })
