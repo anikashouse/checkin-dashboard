@@ -11,15 +11,18 @@ export async function PUT(
     const body = await request.json()
     const { id } = await params
 
+    const updates: Record<string, unknown> = {
+      name:      body.name,
+      ical_url:  body.ical_url,
+    }
+    if (body.address   !== undefined) updates.address   = body.address   || null
+    if (body.mossos_id !== undefined) updates.mossos_id = body.mossos_id || null
+    const coverColor = body.cover_color ?? body.coverColor
+    if (coverColor) updates.cover_color = coverColor
+
     const { error } = await db
       .from('properties')
-      .update({
-        name:        body.name,
-        address:     body.address,
-        ical_url:    body.ical_url,
-        mossos_id:   body.mossos_id,
-        cover_color: body.cover_color ?? null,
-      })
+      .update(updates)
       .eq('id', id)
 
     if (error) throw error
