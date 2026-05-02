@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
+
+const db = supabaseAdmin ?? supabase
 
 export async function PUT(
   request: Request,
@@ -9,7 +11,7 @@ export async function PUT(
     const body = await request.json()
     const { id } = await params
 
-    const { error } = await supabase
+    const { error } = await db
       .from('properties')
       .update({
         name:        body.name,
