@@ -7,6 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { getReservation } from '@/lib/db'
 import TxtSection from '@/components/TxtSection'
 import MossosSection from '@/components/MossosSection'
+import ManualCheckinForm from '@/components/ManualCheckinForm'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -271,12 +272,25 @@ export default async function ReservationPage({
           {guests.length > 0 ? (
             guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
           ) : (
-            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 flex flex-col items-center justify-center text-center gap-2">
+            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 flex flex-col items-center justify-center text-center gap-3">
               <svg className="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <p className="text-sm text-slate-400">Sin datos de huéspedes</p>
-              <p className="text-xs text-slate-300">Sube un fichero .txt para ver la información</p>
+              <div>
+                <p className="text-sm text-slate-400">Sin datos de huéspedes</p>
+                <p className="text-xs text-slate-300 mt-0.5">El huésped no ha rellenado el formulario todavía</p>
+              </div>
+              {!res.checkinStatus?.formComplete && (
+                <ManualCheckinForm
+                  reservationId={reservationId}
+                  airbnbCode={res.airbnbCode ?? ''}
+                  checkIn={res.checkIn}
+                  checkOut={res.checkOut}
+                  totalGuests={res.guests ?? 1}
+                  mossosId={property.mossos_id ?? 'ID50044239'}
+                  establishmentName={property.name}
+                />
+              )}
             </div>
           )}
         </div>
