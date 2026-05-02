@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
-import { uploadToDrive } from '@/lib/google-drive'
+import { uploadToDrive, getOrCreateFolder } from '@/lib/google-drive'
 
 const db = supabaseAdmin ?? supabase
 
@@ -77,18 +77,12 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
 
       if (services?.drive_folder_id && services?.google_refresh_token) {
-        const baseName = filename?.replace(/\.pdf$/i, '') ?? recordId
-
-        if (pdfBase64) {
-          await uploadToDrive({
-            folderId: services.drive_folder_id,
-            filename: filename ?? `comprovant_${baseName}.pdf`,
-            content: Buffer.from(pdfBase64, 'base64'),
-            mimeType: 'application/pdf',
-            refreshToken: services.google_refresh_token,
-          })
-          console.log('[mossos/complete] PDF subido a Drive')
-        }
+        const airbnbCode = resRow?.airbnb_code ?? recordId
+        const subFolderId = await getOrCreateFolder(
+          services.drive_folder_id,
+          airbnbCode,
+          services.google_refresh_token,
+        )
 
         const { data: record } = await db
           .from('checkin_records')
@@ -98,13 +92,24 @@ export async function POST(request: NextRequest) {
 
         if (record?.txt_content) {
           await uploadToDrive({
-            folderId: services.drive_folder_id,
-            filename: record.txt_filename ?? `mossos_${baseName}.txt`,
+            folderId: subFolderId,
+            filename: record.txt_filename ?? `mossos_${airbnbCode}.txt`,
             content: record.txt_content,
             mimeType: 'text/plain',
             refreshToken: services.google_refresh_token,
           })
           console.log('[mossos/complete] TXT subido a Drive')
+        }
+
+        if (pdfBase64) {
+          await uploadToDrive({
+            folderId: subFolderId,
+            filename: filename ?? `comprovant_${airbnbCode}.pdf`,
+            content: Buffer.from(pdfBase64, 'base64'),
+            mimeType: 'application/pdf',
+            refreshToken: services.google_refresh_token,
+          })
+          console.log('[mossos/complete] PDF subido a Drive')
         }
       }
     } catch (driveErr) {
