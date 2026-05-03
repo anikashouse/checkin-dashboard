@@ -45,9 +45,9 @@ function contratoLabel(s?: string): string | undefined {
 function Field({ label, value, mono }: { label: string; value?: string; mono?: boolean }) {
   if (!value) return null
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{label}</dt>
-      <dd className={`text-xs text-slate-900 mt-0.5 ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
+      <dd className={`text-xs text-slate-900 mt-0.5 break-all ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
     </div>
   )
 }
