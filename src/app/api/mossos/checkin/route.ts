@@ -33,21 +33,44 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString()
-    const { error } = await db.from('checkin_records').upsert({
-      id: crypto.randomUUID(),
-      reservation_id: reservation.id,
-      property_id: reservation.property_id,
-      airbnb_code: airbnbCode.toUpperCase(),
-      guest_data: guestData ?? null,
-      txt_content: txtContent ?? null,
-      txt_filename: txtFilename ?? null,
-      form_complete: true,
-      completed_at: now,
-      updated_at: now,
-    }, { onConflict: 'reservation_id' })
+
+    // Check if a record already exists for this reservation
+    const { data: existing } = await db
+      .from('checkin_records')
+      .select('id')
+      .eq('reservation_id', reservation.id)
+      .maybeSingle()
+
+    let error
+    if (existing) {
+      // Always overwrite txt_content so the send route uses the latest file
+      ;({ error } = await db
+        .from('checkin_records')
+        .update({
+          guest_data: guestData ?? null,
+          txt_content: txtContent ?? null,
+          txt_filename: txtFilename ?? null,
+          form_complete: true,
+          updated_at: now,
+        })
+        .eq('reservation_id', reservation.id))
+    } else {
+      ;({ error } = await db.from('checkin_records').insert({
+        id: crypto.randomUUID(),
+        reservation_id: reservation.id,
+        property_id: reservation.property_id,
+        airbnb_code: airbnbCode.toUpperCase(),
+        guest_data: guestData ?? null,
+        txt_content: txtContent ?? null,
+        txt_filename: txtFilename ?? null,
+        form_complete: true,
+        completed_at: now,
+        updated_at: now,
+      }))
+    }
 
     if (error) {
-      console.error('[mossos/checkin] upsert error:', error)
+      console.error('[mossos/checkin] db error:', error)
       return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
     }
 

@@ -28,7 +28,7 @@ export default async function Dashboard() {
   const pending = reservations.filter(r => new Date(r.checkOut) >= now).length
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 mb-1">Buenas, {userName?.split(' ')[0]} 👋</h1>
         <p className="text-slate-400 text-sm">

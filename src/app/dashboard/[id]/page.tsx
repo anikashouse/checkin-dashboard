@@ -24,7 +24,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   const now = new Date()
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>

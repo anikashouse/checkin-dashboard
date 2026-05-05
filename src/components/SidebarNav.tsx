@@ -6,7 +6,7 @@ import type { Property } from '@/lib/types'
 
 const FALLBACK_COLORS = ['#C8A96E','#6395D2','#5AB98C','#D26E9B','#9B78D2']
 
-export default function SidebarNav({ properties }: { properties: Property[] }) {
+export default function SidebarNav({ properties, onLinkClick }: { properties: Property[]; onLinkClick?: () => void }) {
   const pathname = usePathname()
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
@@ -22,6 +22,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
           <Link
             key={p.id}
             href={href}
+            onClick={onLinkClick}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
               active ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
@@ -35,6 +36,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
       <div className="pt-3 mt-3 border-t border-slate-800 space-y-0.5">
         <Link
           href="/dashboard"
+          onClick={onLinkClick}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
             pathname === '/dashboard' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
@@ -47,6 +49,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
         <Link
           href="/dashboard/settings/properties"
+          onClick={onLinkClick}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
             isActive('/dashboard/settings/properties') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
@@ -60,6 +63,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
         <Link
           href="/dashboard/settings/services"
+          onClick={onLinkClick}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
             isActive('/dashboard/settings/services') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
@@ -72,6 +76,7 @@ export default function SidebarNav({ properties }: { properties: Property[] }) {
 
         <Link
           href="/dashboard/settings/profile"
+          onClick={onLinkClick}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
             isActive('/dashboard/settings/profile') ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
