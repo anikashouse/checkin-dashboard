@@ -5,6 +5,15 @@ const db = supabaseAdmin ?? supabase
 
 const isRealCode = (code: string) => /^HM[A-Z0-9]+$/.test(code)
 
+export async function GET() {
+  const { data, error } = await db
+    .from('reservations')
+    .select('airbnb_code, property_id, check_in, check_out')
+    .order('check_in')
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ count: data?.length ?? 0, reservations: data })
+}
+
 export async function POST() {
   try {
     const { data: all, error } = await db
