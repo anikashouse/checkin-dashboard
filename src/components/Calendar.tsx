@@ -72,11 +72,11 @@ function getUrgency(res: Reservation, todayStr: string): BlockItem['urgency'] {
 const URGENCY_STYLES: Record<BlockItem['urgency'], {
   bg: string; border: string; text: string; pulse?: boolean
 }> = {
-  done:    { bg: '0.055', border: '0.35', text: 'text-slate-400' },
-  normal:  { bg: '0.125', border: '1',    text: 'text-slate-900' },
-  soon:    { bg: 'amber', border: 'amber', text: 'text-amber-700' },
-  active:  { bg: 'red',   border: 'red',   text: 'text-red-600' },
-  overdue: { bg: 'red',   border: 'red',   text: 'text-red-500' },
+  done:    { bg: '0.06',  border: '0.3',  text: 'text-slate-400' },
+  normal:  { bg: '0.14',  border: '1',    text: 'text-slate-900' },
+  soon:    { bg: '0.18',  border: '0.85', text: 'text-amber-700' },
+  active:  { bg: '0.18',  border: '0.85', text: 'text-red-600' },
+  overdue: { bg: '0.18',  border: '0.85', text: 'text-red-500' },
 }
 
 function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
@@ -96,22 +96,17 @@ function ReservationBlock({ item }: { item: BlockItem }) {
   const surname = item.res.checkinStatus?.guestSurname
   const u       = item.urgency
 
-  // Property colour blocks for done/normal; fixed colours for urgent states
-  const bgStyle   = u === 'done'    ? `rgba(${r},${g},${b},0.055)`
-                  : u === 'soon'    ? 'rgba(251,191,36,0.15)'
-                  : u === 'active'  ? 'rgba(239,68,68,0.07)'
-                  : u === 'overdue' ? 'rgba(239,68,68,0.06)'
-                  :                   `rgba(${r},${g},${b},0.125)`
+  // Background always uses property colour so you can tell apartments apart.
+  // Urgency only affects opacity and border/text — never overrides the property hue.
+  const bgOpacity = u === 'done' ? '0.06' : u === 'normal' ? '0.14' : '0.18'
+  const bgStyle   = `rgba(${r},${g},${b},${bgOpacity})`
 
-  const borderRgb = u === 'soon'    ? '251,146,60'
-                  : u === 'active'  ? '239,68,68'
-                  : u === 'overdue' ? '220,38,38'
-                  :                   `${r},${g},${b}`
-
-  const borderAlpha = u === 'done'    ? '0.35'
-                    : u === 'active'  ? '0.5'
-                    : u === 'overdue' ? '0.45'
-                    :                   '1'
+  // Urgency accent colour for border and text cues
+  const accentRgb   = u === 'soon'    ? '251,146,60'
+                    : u === 'active'  ? '239,68,68'
+                    : u === 'overdue' ? '220,38,38'
+                    :                   `${r},${g},${b}`
+  const accentAlpha = u === 'done' ? '0.3' : u === 'normal' ? '1' : '0.85'
 
   return (
     <Link
@@ -119,8 +114,8 @@ function ReservationBlock({ item }: { item: BlockItem }) {
       className={`block text-xs rounded px-1 py-0.5 rounded-r-none hover:brightness-95 transition-[filter] ${u === 'active' ? 'ring-1 ring-red-300 ring-inset' : ''}`}
       style={{
         backgroundColor: bgStyle,
-        borderLeft:  item.isStart ? `2px solid rgba(${borderRgb},${borderAlpha})` : '2px solid transparent',
-        borderRight: item.isEnd   ? `2px solid rgba(${borderRgb},${borderAlpha})` : undefined,
+        borderLeft:  item.isStart ? `2px solid rgba(${accentRgb},${accentAlpha})` : '2px solid transparent',
+        borderRight: item.isEnd   ? `2px solid rgba(${accentRgb},${accentAlpha})` : undefined,
       }}
     >
       <div className={`font-semibold truncate text-xs ${URGENCY_STYLES[u].text}`}>
