@@ -185,7 +185,20 @@ export function parseIcalText(text: string): Array<{
   }
 
   events.sort((a, b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime())
-  return events
+
+  // Deduplicate by (checkIn, checkOut): if two events cover the same dates, prefer the one
+  // with a "real" Airbnb code (HM…) over a UID-derived fallback. Airbnb iCals often include
+  // both a real booking event and a generic "Reserved" blocking period for the same dates.
+  const isRealCode = (code: string) => /^HM[A-Z0-9]+$/.test(code)
+  const deduped = new Map<string, typeof events[0]>()
+  for (const event of events) {
+    const key = `${event.checkIn}|${event.checkOut}`
+    const prev = deduped.get(key)
+    if (!prev || (isRealCode(event.airbnbCode) && !isRealCode(prev.airbnbCode))) {
+      deduped.set(key, event)
+    }
+  }
+  return Array.from(deduped.values()).sort((a, b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime())
 }
 
 async function fetchIcal(ical_url: string): Promise<string | null> {
@@ -266,7 +279,15 @@ export async function syncReservationsFromIcals(): Promise<void> {
 
           if (error) console.error('Error updating reservation:', error)
         } else if (!existingGlobal) {
-          // Only insert if it doesn't exist in any property
+          // Guard: skip if any existing reservation for this property overlaps these dates
+          const overlaps = existingRes.some(
+            r => event.checkIn < r.checkOut && event.checkOut > r.checkIn
+          )
+          if (overlaps) {
+            console.log(`[iCal Sync] Skipping overlapping event ${event.airbnbCode} for ${prop.name}`)
+            continue
+          }
+
           const { error } = await db.from('reservations').insert({
             id: `${prop.id}-${event.airbnbCode}`,
             property_id: prop.id,

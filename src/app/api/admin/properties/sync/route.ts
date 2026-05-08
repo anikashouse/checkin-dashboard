@@ -91,6 +91,12 @@ export async function POST(request: Request) {
 
         if (!error) updated++
       } else if (!globalCodes.has(event.airbnbCode)) {
+        // Guard: skip if any existing reservation for this property overlaps these dates
+        const overlaps = existingRes?.some(
+          r => event.checkIn < r.check_out && event.checkOut > r.check_in
+        )
+        if (overlaps) continue
+
         // Insert — not in any property yet
         const { error } = await supabase.from('reservations').insert({
           id: `${propertyId}-${event.airbnbCode}`,

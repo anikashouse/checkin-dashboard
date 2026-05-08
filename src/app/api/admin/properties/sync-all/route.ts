@@ -74,6 +74,11 @@ export async function POST() {
           }).eq('id', existing.id)
           if (!error) updated++
         } else if (!globalCodes.has(event.airbnbCode)) {
+          const overlaps = existingRes?.some(
+            (r: any) => event.checkIn < r.check_out && event.checkOut > r.check_in
+          )
+          if (overlaps) continue
+
           const { error } = await db.from('reservations').insert({
             id: `${prop.id}-${event.airbnbCode}`,
             property_id: prop.id,
