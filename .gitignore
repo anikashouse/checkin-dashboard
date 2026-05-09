@@ -43,5 +43,14 @@ client_secret_*.json
 *.tsbuildinfo
 next-env.d.ts
 
-# Private docs
+# Private / dev-only docs
+CLAUDE.md
+AGENTS.md
+API.md
+FUNCTIONALLITY.md
 SETUP_GUIDE.md
+TEMPFILE.txt
+dev.log
+layout-preview.html
+visual_style*.PNG
+visual_style*.png
