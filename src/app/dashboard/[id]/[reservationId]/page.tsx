@@ -8,6 +8,7 @@ import { getReservation } from '@/lib/db'
 import TxtSection from '@/components/TxtSection'
 import MossosSection from '@/components/MossosSection'
 import ManualCheckinForm from '@/components/ManualCheckinForm'
+import MarkCashPaidButton from '@/components/MarkCashPaidButton'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -230,19 +231,26 @@ export default async function ReservationPage({
                   ? 'Formulario completado por el huésped'
                   : 'El huésped aún no ha completado el formulario'}
               />
-              <StatusRow
-                label="Tasa turística"
-                status={
-                  checkinRecord?.tax_payment_method === 'online' ? 'ok' :
-                  checkinRecord?.tax_payment_method === 'cash'   ? 'error' :
-                  'pending'
-                }
-                description={
-                  checkinRecord?.tax_payment_method === 'online' ? 'Pagada online con tarjeta' :
-                  checkinRecord?.tax_payment_method === 'cash'   ? '⚠ Pendiente cobro en efectivo' :
-                  'Sin información de pago'
-                }
-              />
+              <div>
+                <StatusRow
+                  label="Tasa turística"
+                  status={
+                    checkinRecord?.tax_payment_method === 'online'    ? 'ok' :
+                    checkinRecord?.tax_payment_method === 'cash_paid' ? 'ok' :
+                    checkinRecord?.tax_payment_method === 'cash'      ? 'error' :
+                    'pending'
+                  }
+                  description={
+                    checkinRecord?.tax_payment_method === 'online'    ? 'Pagada online con tarjeta' :
+                    checkinRecord?.tax_payment_method === 'cash_paid' ? 'Cobrada en efectivo' :
+                    checkinRecord?.tax_payment_method === 'cash'      ? '⚠ Pendiente cobro en efectivo' :
+                    'Sin información de pago'
+                  }
+                />
+                {checkinRecord?.tax_payment_method === 'cash' && (
+                  <MarkCashPaidButton reservationId={reservationId} />
+                )}
+              </div>
               <div>
                 <StatusRow
                   label="Fichero .txt"
