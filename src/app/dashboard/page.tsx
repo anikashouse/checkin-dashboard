@@ -99,6 +99,21 @@ export default async function Dashboard() {
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.formComplete ? 'bg-green-400' : 'bg-slate-300'}`} title="Formulario" />
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.txtGenerated ? 'bg-green-400' : 'bg-slate-300'}`} title=".txt" />
                               <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.mossosSent ? 'bg-green-400' : 'bg-slate-300'}`} title="Mossos" />
+                              <span
+                                className={`w-2 h-2 rounded-full ${
+                                  res.checkinStatus?.taxPaymentMethod === 'online' || res.checkinStatus?.taxPaymentMethod === 'cash_paid'
+                                    ? 'bg-emerald-500'
+                                    : res.checkinStatus?.taxPaymentMethod === 'cash'
+                                      ? 'bg-amber-400'
+                                      : 'bg-slate-300'
+                                }`}
+                                title={
+                                  res.checkinStatus?.taxPaymentMethod === 'online'    ? 'Tasa: pagada online' :
+                                  res.checkinStatus?.taxPaymentMethod === 'cash_paid' ? 'Tasa: cobrada en efectivo' :
+                                  res.checkinStatus?.taxPaymentMethod === 'cash'      ? 'Tasa: efectivo pendiente' :
+                                  'Tasa: sin registrar'
+                                }
+                              />
                             </div>
                           </Link>
                         )
