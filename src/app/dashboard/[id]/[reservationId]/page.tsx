@@ -161,7 +161,7 @@ export default async function ReservationPage({
   const guests = res.checkinStatus?.guests ?? []
 
   return (
-    <div className="p-6 flex flex-col h-full">
+    <div className="p-6">
       {/* Back */}
       <Link
         href={`/dashboard/${id}`}
@@ -180,10 +180,10 @@ export default async function ReservationPage({
       </div>
 
       {/* Layout */}
-      <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">
+      <div className="flex gap-4 items-start">
 
-        {/* Left — reservation + mossos */}
-        <div className="w-80 shrink-0 space-y-3 overflow-y-auto pb-4">
+        {/* Left — reservation + mossos — sticky so it stays visible while scrolling guests */}
+        <div className="w-80 shrink-0 space-y-3 sticky top-6">
 
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Detalles de la reserva</h2>
@@ -288,8 +288,8 @@ export default async function ReservationPage({
 
         </div>
 
-        {/* Right — guest cards */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3 overflow-y-auto pb-4">
+        {/* Right — guest cards — natural height, page scrolls */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3 pb-6">
           {guests.length > 0 ? (
             guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
           ) : (
