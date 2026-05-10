@@ -53,6 +53,7 @@ export interface CheckinStatus {
   formComplete: boolean
   txtGenerated: boolean
   mossosSent: boolean
+  taxPaymentMethod?: 'online' | 'cash' | 'cash_paid' | null
   sentAt?: string
   guestSurname?: string
   guests?: GuestData[]

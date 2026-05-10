@@ -80,6 +80,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                       <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.formComplete ? 'bg-emerald-500' : 'bg-slate-300'}`} title="Formulario" />
                       <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.txtGenerated ? 'bg-emerald-500' : 'bg-slate-300'}`} title=".txt" />
                       <span className={`w-2 h-2 rounded-full ${res.checkinStatus?.mossosSent ? 'bg-emerald-500' : 'bg-slate-300'}`} title="Mossos" />
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          res.checkinStatus?.taxPaymentMethod === 'online' || res.checkinStatus?.taxPaymentMethod === 'cash_paid'
+                            ? 'bg-emerald-500'
+                            : res.checkinStatus?.taxPaymentMethod === 'cash'
+                              ? 'bg-amber-400'
+                              : 'bg-slate-300'
+                        }`}
+                        title={
+                          res.checkinStatus?.taxPaymentMethod === 'online'    ? 'Tasa: pagada online' :
+                          res.checkinStatus?.taxPaymentMethod === 'cash_paid' ? 'Tasa: cobrada en efectivo' :
+                          res.checkinStatus?.taxPaymentMethod === 'cash'      ? 'Tasa: efectivo pendiente' :
+                          'Tasa: sin registrar'
+                        }
+                      />
                     </div>
                     <span className="text-xs text-slate-400 whitespace-nowrap">
                       {new Date(res.checkIn).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}

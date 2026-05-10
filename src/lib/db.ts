@@ -37,12 +37,13 @@ function rowToReservation(row: any): Reservation {
 function rowToCheckinStatus(row: any): CheckinStatus {
   const guests = (row.guest_data ?? []) as GuestData[]
   return {
-    formComplete:  row.form_complete ?? false,
-    txtGenerated:  !!(row.txt_path || row.txt_content),
-    mossosSent:    row.mossos_sent ?? false,
-    sentAt:        row.sent_at ?? row.completed_at ?? undefined,
-    guestSurname:  guests[0]?.ap1 || undefined,
-    guests:        guests.length > 0 ? guests : undefined,
+    formComplete:       row.form_complete ?? false,
+    txtGenerated:       !!(row.txt_path || row.txt_content),
+    mossosSent:         row.mossos_sent ?? false,
+    taxPaymentMethod:   row.tax_payment_method ?? null,
+    sentAt:             row.sent_at ?? row.completed_at ?? undefined,
+    guestSurname:       guests[0]?.ap1 || undefined,
+    guests:             guests.length > 0 ? guests : undefined,
   }
 }
 

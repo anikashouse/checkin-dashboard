@@ -90,6 +90,24 @@ function StatusDot({ green, tooltip }: { green: boolean; tooltip: string }) {
   )
 }
 
+function TaxDot({ method }: { method: 'online' | 'cash' | 'cash_paid' | null | undefined }) {
+  const color = method === 'online' || method === 'cash_paid' ? 'bg-emerald-500'
+              : method === 'cash'                            ? 'bg-amber-400'
+              :                                               'bg-slate-300'
+  const tooltip = method === 'online'    ? '💳 Tasa pagada online'
+                : method === 'cash_paid' ? '💵 Tasa cobrada en efectivo'
+                : method === 'cash'      ? '⏳ Tasa pendiente (efectivo)'
+                :                         '○ Tasa sin registrar'
+  return (
+    <div className="group relative">
+      <div className={`w-1.5 h-1.5 rounded-full cursor-help ${color}`} />
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-1.5 py-0.5 bg-slate-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+        {tooltip}
+      </div>
+    </div>
+  )
+}
+
 function ReservationBlock({ item }: { item: BlockItem }) {
   const { r, g, b } = item.color
   const code    = item.res.airbnbCode || item.res.guestName || 'Guest'
@@ -128,6 +146,7 @@ function ReservationBlock({ item }: { item: BlockItem }) {
         <StatusDot green={item.res.checkinStatus?.formComplete ?? false} tooltip={item.res.checkinStatus?.formComplete ? '✓ Formulario' : '○ Sin formulario'} />
         <StatusDot green={item.res.checkinStatus?.txtGenerated ?? false} tooltip={item.res.checkinStatus?.txtGenerated ? '✓ .txt generado' : '○ Sin .txt'} />
         <StatusDot green={item.res.checkinStatus?.mossosSent ?? false} tooltip={item.res.checkinStatus?.mossosSent ? '✓ Enviado a Mossos' : '○ Sin comprobante'} />
+        <TaxDot method={item.res.checkinStatus?.taxPaymentMethod ?? null} />
       </div>
     </Link>
   )
