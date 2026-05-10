@@ -48,7 +48,7 @@ function Field({ label, value, mono }: { label: string; value?: string; mono?: b
   return (
     <div className="min-w-0">
       <dt className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{label}</dt>
-      <dd className={`text-xs text-slate-900 mt-0.5 break-all ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
+      <dd className={`text-xs text-slate-900 mt-0.5 break-words ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
     </div>
   )
 }
@@ -57,7 +57,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div>
       <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">{title}</p>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2">{children}</dl>
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-2.5">{children}</dl>
     </div>
   )
 }
@@ -85,7 +85,7 @@ function GuestCard({ g, index }: { g: GuestData; index: number }) {
         </p>
       </div>
 
-      <div className="px-4 py-3 space-y-3">
+      <div className="px-4 py-4 space-y-4">
         {hasDoc && (
           <Section title="Documento">
             <Field label={docLabel(g.tipo) ?? 'Documento'} value={g.numdoc} mono />
@@ -180,10 +180,10 @@ export default async function ReservationPage({
       </div>
 
       {/* Layout */}
-      <div className="flex gap-4 flex-1 min-h-0">
+      <div className="flex gap-4 flex-1 min-h-0 overflow-hidden">
 
         {/* Left — reservation + mossos */}
-        <div className="w-80 shrink-0 space-y-3">
+        <div className="w-80 shrink-0 space-y-3 overflow-y-auto pb-4">
 
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Detalles de la reserva</h2>
@@ -289,10 +289,7 @@ export default async function ReservationPage({
         </div>
 
         {/* Right — guest cards */}
-        <div
-          className="flex-1 min-w-0 grid gap-3"
-          style={guests.length > 0 ? { gridTemplateRows: `repeat(${guests.length}, 1fr)` } : undefined}
-        >
+        <div className="flex-1 min-w-0 flex flex-col gap-3 overflow-y-auto pb-4">
           {guests.length > 0 ? (
             guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
           ) : (
