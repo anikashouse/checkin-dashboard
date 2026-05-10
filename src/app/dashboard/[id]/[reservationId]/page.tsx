@@ -47,17 +47,17 @@ function Field({ label, value, mono }: { label: string; value?: string; mono?: b
   if (!value) return null
   return (
     <div className="min-w-0">
-      <dt className="text-[9px] font-medium text-slate-400 uppercase tracking-wide">{label}</dt>
-      <dd className={`text-[11px] text-slate-900 mt-0.5 break-words ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
+      <dt className="text-[8px] font-medium text-slate-400 uppercase tracking-wide leading-none mb-0.5">{label}</dt>
+      <dd className={`text-[11px] text-slate-900 break-words leading-tight ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
     </div>
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, cols = 4, children }: { title: string; cols?: number; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-1">{title}</p>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">{children}</dl>
+      <p className="text-[8px] font-semibold text-slate-300 uppercase tracking-widest mb-1">{title}</p>
+      <dl className={`grid gap-x-4 gap-y-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>{children}</dl>
     </div>
   )
 }
@@ -78,49 +78,56 @@ function GuestCard({ g, index }: { g: GuestData; index: number }) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="px-3 py-2 bg-slate-50 border-b border-gray-100">
+      <div className="px-3 py-2 bg-slate-50 border-b border-gray-100 flex items-baseline gap-3">
         <p className="font-bold text-slate-900 text-xs">{fullName}</p>
-        <p className="text-[10px] text-slate-400 mt-0.5">
+        <p className="text-[10px] text-slate-400">
           {[sexLabel(g.sexe), g.nac, fmtDate(g.naix), menorLabel(g.menor) ? `Menor: ${menorLabel(g.menor)}` : null].filter(Boolean).join(' · ')}
         </p>
       </div>
 
-      <div className="px-3 py-3 space-y-3">
-        {hasDoc && (
-          <Section title="Documento">
-            <Field label={docLabel(g.tipo) ?? 'Documento'} value={g.numdoc} mono />
-            <Field label="Expedición" value={fmtDate(g.expedicion)} />
-            <Field label="Nº soporte DNI" value={g.soporte_dni} mono />
+      <div className="px-3 py-2 space-y-2">
+        {/* Row 1: Documento + Estancia */}
+        <div className="grid grid-cols-2 gap-4">
+          {hasDoc && (
+            <Section title="Documento" cols={3}>
+              <Field label={docLabel(g.tipo) ?? 'Doc'} value={g.numdoc} mono />
+              <Field label="Expedición" value={fmtDate(g.expedicion)} />
+              <Field label="Nº soporte" value={g.soporte_dni} mono />
+            </Section>
+          )}
+          <Section title="Estancia" cols={2}>
+            <Field label="Entrada" value={fmtDateTime(g.entrada, g.hora_entrada)} />
+            <Field label="Salida"  value={fmtDateTime(g.salida, g.hora_salida)} />
           </Section>
-        )}
+        </div>
 
-        <Section title="Estancia">
-          <Field label="Entrada" value={fmtDateTime(g.entrada, g.hora_entrada)} />
-          <Field label="Salida"  value={fmtDateTime(g.salida, g.hora_salida)} />
-        </Section>
-
+        {/* Row 2: Reserva */}
         {(g.fecha_contrato || g.tipo_contrato || g.airbnb_code_txt || g.num_viajeros || g.num_habitaciones || g.tipo_pago) && (
-          <Section title="Reserva">
-            <Field label="Cód. Airbnb"  value={g.airbnb_code_txt} mono />
-            <Field label="Fecha contrato" value={fmtDate(g.fecha_contrato)} />
-            <Field label="Tipo contrato" value={contratoLabel(g.tipo_contrato)} />
-            <Field label="Nº viajeros"  value={g.num_viajeros} />
-            <Field label="Habitaciones" value={g.num_habitaciones} />
-            <Field label="Tipo pago"    value={g.tipo_pago} />
+          <Section title="Reserva" cols={6}>
+            <Field label="Cód. Airbnb"    value={g.airbnb_code_txt} mono />
+            <Field label="F. contrato"    value={fmtDate(g.fecha_contrato)} />
+            <Field label="Tipo contrato"  value={contratoLabel(g.tipo_contrato)} />
+            <Field label="Viajeros"       value={g.num_viajeros} />
+            <Field label="Habitaciones"   value={g.num_habitaciones} />
+            <Field label="Pago"           value={g.tipo_pago} />
           </Section>
         )}
 
-        {hasContact && (
-          <Section title="Contacto">
-            <Field label="Teléfono" value={g.tel} />
-            <Field label="Email" value={g.email} />
-          </Section>
-        )}
-
-        {hasAddress && (
-          <div>
-            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-1">Dirección</p>
-            <p className="text-[11px] text-slate-900 font-medium">{addressLine}</p>
+        {/* Row 3: Contacto + Dirección */}
+        {(hasContact || hasAddress) && (
+          <div className="grid grid-cols-2 gap-4">
+            {hasContact && (
+              <Section title="Contacto" cols={2}>
+                <Field label="Teléfono" value={g.tel} />
+                <Field label="Email"    value={g.email} />
+              </Section>
+            )}
+            {hasAddress && (
+              <div>
+                <p className="text-[8px] font-semibold text-slate-300 uppercase tracking-widest mb-1">Dirección</p>
+                <p className="text-[11px] text-slate-900 font-medium leading-tight">{addressLine}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
