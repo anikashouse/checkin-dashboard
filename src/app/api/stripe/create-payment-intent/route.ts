@@ -25,6 +25,8 @@ export async function POST(request: Request) {
       amount,
       currency: currency ?? 'eur',
       automatic_payment_methods: { enabled: true },
+      description: `Tasa turística · ${metadata?.reserva ?? ''} · ${metadata?.guests ?? ''} huéspedes · ${metadata?.nights ?? ''} noches`,
+      statement_descriptor: "TASA TURISTICA",
       metadata: metadata ?? {},
     })
 
