@@ -47,8 +47,8 @@ function Field({ label, value, mono }: { label: string; value?: string; mono?: b
   if (!value) return null
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{label}</dt>
-      <dd className={`text-xs text-slate-900 mt-0.5 break-words ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
+      <dt className="text-[9px] font-medium text-slate-400 uppercase tracking-wide">{label}</dt>
+      <dd className={`text-[11px] text-slate-900 mt-0.5 break-words ${mono ? 'font-mono' : 'font-medium'}`}>{value}</dd>
     </div>
   )
 }
@@ -56,8 +56,8 @@ function Field({ label, value, mono }: { label: string; value?: string; mono?: b
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">{title}</p>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-2.5">{children}</dl>
+      <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-1">{title}</p>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">{children}</dl>
     </div>
   )
 }
@@ -77,15 +77,15 @@ function GuestCard({ g, index }: { g: GuestData; index: number }) {
   ].filter(Boolean).join(', ')
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-slate-50 border-b border-gray-100">
-        <p className="font-bold text-slate-900 text-sm">{fullName}</p>
-        <p className="text-xs text-slate-400 mt-0.5">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="px-3 py-2 bg-slate-50 border-b border-gray-100">
+        <p className="font-bold text-slate-900 text-xs">{fullName}</p>
+        <p className="text-[10px] text-slate-400 mt-0.5">
           {[sexLabel(g.sexe), g.nac, fmtDate(g.naix), menorLabel(g.menor) ? `Menor: ${menorLabel(g.menor)}` : null].filter(Boolean).join(' · ')}
         </p>
       </div>
 
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-3 py-3 space-y-3">
         {hasDoc && (
           <Section title="Documento">
             <Field label={docLabel(g.tipo) ?? 'Documento'} value={g.numdoc} mono />
@@ -119,8 +119,8 @@ function GuestCard({ g, index }: { g: GuestData; index: number }) {
 
         {hasAddress && (
           <div>
-            <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Dirección</p>
-            <p className="text-sm text-slate-900 font-medium">{addressLine}</p>
+            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-1">Dirección</p>
+            <p className="text-[11px] text-slate-900 font-medium">{addressLine}</p>
           </div>
         )}
       </div>
@@ -161,7 +161,7 @@ export default async function ReservationPage({
   const guests = res.checkinStatus?.guests ?? []
 
   return (
-    <div className="p-6">
+    <div className="p-4">
       {/* Back */}
       <Link
         href={`/dashboard/${id}`}
@@ -183,11 +183,11 @@ export default async function ReservationPage({
       <div className="flex gap-4 items-start">
 
         {/* Left — reservation + mossos — sticky so it stays visible while scrolling guests */}
-        <div className="w-80 shrink-0 space-y-3 sticky top-6">
+        <div className="w-64 shrink-0 space-y-2 sticky top-4">
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Detalles de la reserva</h2>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <h2 className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Detalles de la reserva</h2>
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
               <div>
                 <dt className="text-[10px] text-slate-400">Check-in</dt>
                 <dd className="font-semibold text-slate-900 text-xs mt-0.5">
@@ -221,46 +221,50 @@ export default async function ReservationPage({
             </dl>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Estado Mossos</h2>
-            <div className="space-y-3">
-              <StatusRow
-                label="Formulario rellenado"
-                status={res.checkinStatus?.formComplete ? 'ok' : 'pending'}
-                description={res.checkinStatus?.formComplete
-                  ? 'Formulario completado por el huésped'
-                  : 'El huésped aún no ha completado el formulario'}
+          {/* Tasa turística */}
+          <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <h2 className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Tasa turística</h2>
+            <StatusRow
+              label={
+                checkinRecord?.tax_payment_method === 'online'    ? 'Pagada online' :
+                checkinRecord?.tax_payment_method === 'cash_paid' ? 'Cobrada en efectivo' :
+                checkinRecord?.tax_payment_method === 'cash'      ? 'Pendiente — efectivo' :
+                'Sin información'
+              }
+              status={
+                checkinRecord?.tax_payment_method === 'online'    ? 'ok' :
+                checkinRecord?.tax_payment_method === 'cash_paid' ? 'ok' :
+                checkinRecord?.tax_payment_method === 'cash'      ? 'error' :
+                'pending'
+              }
+              description={
+                checkinRecord?.tax_payment_method === 'cash' ? '⚠ Cobrar en el check-in' : ''
+              }
+            />
+            {checkinRecord && (
+              <TaxPaymentControl
+                reservationId={reservationId}
+                current={checkinRecord.tax_payment_method as any ?? null}
               />
-              <div>
-                <StatusRow
-                  label="Tasa turística"
-                  status={
-                    checkinRecord?.tax_payment_method === 'online'    ? 'ok' :
-                    checkinRecord?.tax_payment_method === 'cash_paid' ? 'ok' :
-                    checkinRecord?.tax_payment_method === 'cash'      ? 'error' :
-                    'pending'
-                  }
-                  description={
-                    checkinRecord?.tax_payment_method === 'online'    ? 'Pagada online con tarjeta' :
-                    checkinRecord?.tax_payment_method === 'cash_paid' ? 'Cobrada en efectivo' :
-                    checkinRecord?.tax_payment_method === 'cash'      ? '⚠ Pendiente cobro en efectivo' :
-                    'Sin información de pago'
-                  }
-                />
-                {checkinRecord && (
-                  <TaxPaymentControl
-                    reservationId={reservationId}
-                    current={checkinRecord.tax_payment_method as any ?? null}
-                  />
-                )}
-              </div>
+            )}
+          </div>
+
+          {/* Mossos */}
+          <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <h2 className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Estado Mossos</h2>
+            <div className="space-y-2">
+              <StatusRow
+                label="Formulario"
+                status={res.checkinStatus?.formComplete ? 'ok' : 'pending'}
+                description={res.checkinStatus?.formComplete ? 'Completado' : 'Pendiente'}
+              />
               <div>
                 <StatusRow
                   label="Fichero .txt"
                   status={res.checkinStatus?.txtGenerated ? 'ok' : 'pending'}
                   description={res.checkinStatus?.txtGenerated
-                    ? checkinRecord?.txt_filename ?? 'Fichero disponible'
-                    : 'Sin fichero .txt'}
+                    ? checkinRecord?.txt_filename ?? 'Disponible'
+                    : 'Sin fichero'}
                 />
                 <TxtSection
                   reservationId={reservationId}
@@ -274,7 +278,7 @@ export default async function ReservationPage({
                   status={res.checkinStatus?.mossosSent ? 'ok' : 'pending'}
                   description={res.checkinStatus?.mossosSent
                     ? `Enviado${res.checkinStatus.sentAt ? ` el ${new Date(res.checkinStatus.sentAt).toLocaleDateString('es-ES')}` : ''}`
-                    : 'Pendiente de envío'}
+                    : 'Pendiente'}
                 />
                 <MossosSection
                   reservationId={reservationId}
@@ -328,11 +332,11 @@ function StatusRow({ label, status, description }: {
 }) {
   const dot = status === 'ok' ? 'bg-green-500' : status === 'error' ? 'bg-red-500' : 'bg-slate-300'
   return (
-    <div className="flex items-start gap-3">
-      <span className={`mt-0.5 w-2.5 h-2.5 rounded-full shrink-0 ${dot}`} />
+    <div className="flex items-start gap-2">
+      <span className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${dot}`} />
       <div>
-        <p className="text-sm font-medium text-slate-900">{label}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+        <p className="text-[11px] font-medium text-slate-900">{label}</p>
+        {description && <p className="text-[10px] text-slate-400">{description}</p>}
       </div>
     </div>
   )
