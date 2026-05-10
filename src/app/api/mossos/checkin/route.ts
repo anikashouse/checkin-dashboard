@@ -15,13 +15,17 @@ export async function OPTIONS() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { reservationId } = await request.json()
+    const { reservationId, taxPaymentMethod } = await request.json()
     if (!reservationId) {
       return NextResponse.json({ error: 'reservationId required' }, { status: 400 })
     }
+    const allowed = ['online', 'cash', 'cash_paid']
+    if (!allowed.includes(taxPaymentMethod)) {
+      return NextResponse.json({ error: 'Invalid taxPaymentMethod' }, { status: 400 })
+    }
     const { error } = await db
       .from('checkin_records')
-      .update({ tax_payment_method: 'cash_paid', updated_at: new Date().toISOString() })
+      .update({ tax_payment_method: taxPaymentMethod, updated_at: new Date().toISOString() })
       .eq('reservation_id', reservationId)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })

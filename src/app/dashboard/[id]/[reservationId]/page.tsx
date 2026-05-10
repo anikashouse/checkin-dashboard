@@ -8,7 +8,7 @@ import { getReservation } from '@/lib/db'
 import TxtSection from '@/components/TxtSection'
 import MossosSection from '@/components/MossosSection'
 import ManualCheckinForm from '@/components/ManualCheckinForm'
-import MarkCashPaidButton from '@/components/MarkCashPaidButton'
+import TaxPaymentControl from '@/components/TaxPaymentControl'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -247,8 +247,11 @@ export default async function ReservationPage({
                     'Sin información de pago'
                   }
                 />
-                {checkinRecord?.tax_payment_method === 'cash' && (
-                  <MarkCashPaidButton reservationId={reservationId} />
+                {checkinRecord && (
+                  <TaxPaymentControl
+                    reservationId={reservationId}
+                    current={checkinRecord.tax_payment_method as any ?? null}
+                  />
                 )}
               </div>
               <div>
