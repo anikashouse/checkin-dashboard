@@ -16,7 +16,7 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { airbnbCode, guestData, txtContent, txtFilename } = body
+    const { airbnbCode, guestData, txtContent, txtFilename, taxPaymentMethod } = body
 
     if (!airbnbCode) {
       return NextResponse.json({ error: 'airbnbCode required' }, { status: 400, headers: corsHeaders })
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
           txt_content: txtContent ?? null,
           txt_filename: txtFilename ?? null,
           form_complete: true,
+          tax_payment_method: taxPaymentMethod ?? null,
           updated_at: now,
         })
         .eq('reservation_id', reservation.id))
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
         txt_content: txtContent ?? null,
         txt_filename: txtFilename ?? null,
         form_complete: true,
+        tax_payment_method: taxPaymentMethod ?? null,
         completed_at: now,
         updated_at: now,
       }))

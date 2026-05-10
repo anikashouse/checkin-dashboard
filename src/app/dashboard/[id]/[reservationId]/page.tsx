@@ -146,7 +146,7 @@ export default async function ReservationPage({
 
   const { data: checkinRecord } = await db
     .from('checkin_records')
-    .select('txt_content, txt_filename, pdf_base64, mossos_sent')
+    .select('txt_content, txt_filename, pdf_base64, mossos_sent, tax_payment_method')
     .eq('reservation_id', reservationId)
     .maybeSingle()
 
@@ -229,6 +229,19 @@ export default async function ReservationPage({
                 description={res.checkinStatus?.formComplete
                   ? 'Formulario completado por el huésped'
                   : 'El huésped aún no ha completado el formulario'}
+              />
+              <StatusRow
+                label="Tasa turística"
+                status={
+                  checkinRecord?.tax_payment_method === 'online' ? 'ok' :
+                  checkinRecord?.tax_payment_method === 'cash'   ? 'error' :
+                  'pending'
+                }
+                description={
+                  checkinRecord?.tax_payment_method === 'online' ? 'Pagada online con tarjeta' :
+                  checkinRecord?.tax_payment_method === 'cash'   ? '⚠ Pendiente cobro en efectivo' :
+                  'Sin información de pago'
+                }
               />
               <div>
                 <StatusRow

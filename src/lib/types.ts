@@ -84,6 +84,7 @@ export interface CheckinRecord {
   txt_path?: string
   pdf_path?: string
   form_complete: boolean
+  tax_payment_method?: 'online' | 'cash' | null
   mossos_sent: boolean
   sent_at?: string
   created_at: string
