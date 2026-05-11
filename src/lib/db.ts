@@ -11,9 +11,10 @@ function rowToProperty(row: any): Property {
     name:       row.name,
     address:    row.address,
     city:       row.city,
-    mossos_id:   row.mossos_id,
-    ical_url:    row.ical_url,
+    mossos_id:  row.mossos_id,
+    ical_url:   row.ical_url,
     coverColor: row.cover_color,
+    photo_url:  row.photo_url ?? undefined,
   }
 }
 

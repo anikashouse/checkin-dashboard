@@ -73,6 +73,7 @@ export async function PUT(
     if (body.mossos_id !== undefined) updates.mossos_id = body.mossos_id || null
     const coverColor = body.cover_color ?? body.coverColor
     if (coverColor) updates.cover_color = coverColor
+    if (body.photo_url !== undefined) updates.photo_url = body.photo_url || null
 
     const { error } = await db.from('properties').update(updates).eq('id', id)
     if (error) throw error

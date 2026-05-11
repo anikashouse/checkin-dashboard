@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 const PALETTE = [
@@ -16,14 +16,18 @@ interface Props {
     ical_url?: string
     mossos_id?: string
     coverColor?: string
+    photo_url?: string
   }
 }
 
 export default function EditPropertyForm({ property }: Props) {
-  const [open, setOpen]       = useState(false)
-  const [saving, setSaving]   = useState(false)
-  const [error, setError]     = useState('')
-  const [form, setForm]       = useState({
+  const [open, setOpen]         = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [error, setError]       = useState('')
+  const [preview, setPreview]   = useState<string | null>(property.photo_url ?? null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [form, setForm] = useState({
     name:        property.name        ?? '',
     address:     property.address     ?? '',
     ical_url:    property.ical_url    ?? '',
@@ -32,11 +36,26 @@ export default function EditPropertyForm({ property }: Props) {
   })
   const router = useRouter()
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPreview(URL.createObjectURL(file))
+  }
+
   async function handleSave() {
     if (!form.name) { setError('El nombre es obligatorio'); return }
     setSaving(true)
     setError('')
     try {
+      // Upload photo first if a new file was selected
+      if (photoFile) {
+        const fd = new FormData()
+        fd.append('photo', photoFile)
+        const r = await fetch(`/api/admin/properties/${property.id}/photo`, { method: 'POST', body: fd })
+        if (!r.ok) throw new Error('Error al subir la foto')
+      }
+
       const res = await fetch(`/api/admin/properties/${property.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -44,9 +63,10 @@ export default function EditPropertyForm({ property }: Props) {
       })
       if (!res.ok) throw new Error('Error al guardar')
       setOpen(false)
+      setPhotoFile(null)
       router.refresh()
-    } catch {
-      setError('Error al guardar. Inténtalo de nuevo.')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error al guardar. Inténtalo de nuevo.')
     } finally {
       setSaving(false)
     }
@@ -66,7 +86,7 @@ export default function EditPropertyForm({ property }: Props) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-slate-900">Editar propiedad</h2>
               <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -77,6 +97,38 @@ export default function EditPropertyForm({ property }: Props) {
             </div>
 
             <div className="space-y-4">
+              {/* Photo */}
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Foto</label>
+                <div
+                  className="relative w-full aspect-video rounded-lg border-2 border-dashed border-gray-200 overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50 flex items-center justify-center"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {preview ? (
+                    <>
+                      <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-white text-xs font-medium">Cambiar foto</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-6">
+                      <svg className="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-xs text-slate-400">Haz clic para subir una foto</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Nombre *</label>
                 <input
