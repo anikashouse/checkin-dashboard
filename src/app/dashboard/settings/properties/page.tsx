@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { Property } from '@/lib/types'
 import Link from 'next/link'
 import DeletePropertyButton from '@/components/DeletePropertyButton'
@@ -15,6 +15,9 @@ export default function PropertiesSettings() {
   const [testResult, setTestResult] = useState<any>(null)
   const [message, setMessage] = useState('')
   const [syncingAll, setSyncingAll] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadProperties()
@@ -40,6 +43,12 @@ export default function PropertiesSettings() {
     }
 
     try {
+      if (photoFile) {
+        const fd = new FormData()
+        fd.append('photo', photoFile)
+        await fetch(`/api/admin/properties/${editingId}/photo`, { method: 'POST', body: fd })
+      }
+
       const res = await fetch(`/api/admin/properties/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -47,14 +56,16 @@ export default function PropertiesSettings() {
       })
 
       if (res.ok) {
-        setMessage('Property updated successfully')
+        setMessage('Propiedad guardada')
         setEditingId(null)
+        setPhotoFile(null)
+        setPhotoPreview(null)
         await loadProperties()
       } else {
-        setMessage('Error updating property')
+        setMessage('Error al guardar')
       }
     } catch (e) {
-      setMessage('Error updating property')
+      setMessage('Error al guardar')
     }
   }
 
@@ -204,6 +215,38 @@ export default function PropertiesSettings() {
             {editingId === prop.id ? (
               <div className="space-y-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Editar {prop.name}</h2>
+
+                {/* Photo */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Foto</label>
+                  <div
+                    className="relative w-full max-w-xs aspect-video rounded-lg border-2 border-dashed border-gray-200 overflow-hidden cursor-pointer hover:border-orange-400 transition-colors bg-gray-50 flex items-center justify-center"
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    {(photoPreview || prop.photo_url) ? (
+                      <>
+                        <img src={photoPreview ?? prop.photo_url!} alt="Foto" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-white text-xs font-medium">Cambiar foto</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4">
+                        <svg className="w-7 h-7 text-slate-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-xs text-slate-400">Subir foto</p>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => {
+                    const f = e.target.files?.[0]
+                    if (!f) return
+                    setPhotoFile(f)
+                    setPhotoPreview(URL.createObjectURL(f))
+                  }} />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
                   <input type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
@@ -218,15 +261,20 @@ export default function PropertiesSettings() {
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button onClick={handleUpdate} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600">Guardar</button>
-                  <button onClick={() => setEditingId(null)} className="px-4 py-2 bg-gray-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-gray-200">Cancelar</button>
+                  <button onClick={() => { setEditingId(null); setPhotoFile(null); setPhotoPreview(null) }} className="px-4 py-2 bg-gray-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-gray-200">Cancelar</button>
                 </div>
               </div>
             ) : (
               <div>
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="font-bold text-slate-900">{prop.name}</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">{prop.address || prop.id}</p>
+                  <div className="flex items-center gap-3">
+                    {prop.photo_url && (
+                      <img src={prop.photo_url} alt={prop.name} className="w-14 h-10 rounded-lg object-cover border border-gray-200 shrink-0" />
+                    )}
+                    <div>
+                      <h2 className="font-bold text-slate-900">{prop.name}</h2>
+                      <p className="text-xs text-slate-400 mt-0.5">{prop.address || prop.id}</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={() => { setEditingId(prop.id); setFormData(prop) }} className="px-3 py-1 text-sm bg-gray-100 text-slate-700 rounded-lg hover:bg-gray-200">Editar</button>
