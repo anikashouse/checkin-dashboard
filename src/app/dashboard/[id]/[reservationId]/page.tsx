@@ -9,6 +9,7 @@ import TxtSection from '@/components/TxtSection'
 import MossosSection from '@/components/MossosSection'
 import ManualCheckinForm from '@/components/ManualCheckinForm'
 import TaxPaymentControl from '@/components/TaxPaymentControl'
+import PayLinkButton from '@/components/PayLinkButton'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -263,6 +264,7 @@ export default async function ReservationPage({
                 current={checkinRecord.tax_payment_method as any ?? null}
               />
             )}
+            <PayLinkButton reservationId={reservationId} />
           </div>
 
           {/* Mossos */}
