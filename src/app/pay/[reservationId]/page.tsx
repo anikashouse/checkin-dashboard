@@ -53,17 +53,23 @@ export default async function PayPage({
 
   if (!res) notFound()
 
-  const { data: prop } = await db
-    .from('properties')
-    .select('name')
-    .eq('id', res.property_id)
-    .maybeSingle()
+  const [{ data: prop }, { data: cr }] = await Promise.all([
+    db.from('properties').select('name').eq('id', res.property_id).maybeSingle(),
+    db.from('checkin_records').select('guest_data').eq('reservation_id', reservationId).maybeSingle(),
+  ])
 
   const rawNights = res.nights ?? Math.ceil(
     (new Date(res.check_out).getTime() - new Date(res.check_in).getTime()) / 86400000
   )
   const nights    = Math.min(rawNights, 7)
-  const guests    = res.guests ?? 1
+
+  // Prefer the guest count declared in the check-in form over the iCal-parsed value,
+  // because iCal parsing defaults to 1 when the summary doesn't include a guest count.
+  const guestData: any[] = cr?.guest_data ?? []
+  const formGuests = guestData.length > 0
+    ? (parseInt(guestData[0].num_viajeros) || guestData.length)
+    : null
+  const guests    = formGuests ?? res.guests ?? 1
   const netEur    = guests * nights * TAX_RATE
   const netCents  = Math.round(netEur * 100)
   const grossCents = Math.round((netCents + 25) / 0.985)
