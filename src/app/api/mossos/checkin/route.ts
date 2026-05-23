@@ -43,11 +43,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'airbnbCode required' }, { status: 400, headers: corsHeaders })
     }
 
-    const { data: reservation } = await db
+    // Try exact match first, then prefix match as fallback for truncated codes (e.g. missing last char from iCal parsing)
+    let { data: reservation } = await db
       .from('reservations')
       .select('id, property_id')
       .ilike('airbnb_code', airbnbCode)
       .maybeSingle()
+
+    if (!reservation && airbnbCode.length >= 6) {
+      const { data: prefixMatch } = await db
+        .from('reservations')
+        .select('id, property_id')
+        .ilike('airbnb_code', `${airbnbCode}%`)
+        .maybeSingle()
+      reservation = prefixMatch
+    }
 
     if (!reservation) {
       return NextResponse.json({ error: `Reservation not found: ${airbnbCode}` }, { status: 404, headers: corsHeaders })
