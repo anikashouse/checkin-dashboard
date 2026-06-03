@@ -10,6 +10,7 @@ import MossosSection from '@/components/MossosSection'
 import ManualCheckinForm from '@/components/ManualCheckinForm'
 import TaxPaymentControl from '@/components/TaxPaymentControl'
 import PayLinkButton from '@/components/PayLinkButton'
+import EditGuestCards from '@/components/EditGuestCards'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -311,9 +312,9 @@ export default async function ReservationPage({
         </div>
 
         {/* Right — guest cards — natural height, page scrolls */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3 pb-6">
+        <div className="flex-1 min-w-0">
           {guests.length > 0 ? (
-            guests.map((g, i) => <GuestCard key={i} g={g} index={i} />)
+            <EditGuestCards guests={guests} reservationId={reservationId} />
           ) : (
             <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 flex flex-col items-center justify-center text-center gap-3">
               <svg className="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
