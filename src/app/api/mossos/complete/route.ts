@@ -116,24 +116,11 @@ export async function POST(request: NextRequest) {
       console.error('[mossos/complete] Drive upload error:', driveErr)
     }
 
-    // Telegram: send TXT + PDF once Mossos confirms
+    // Telegram: send only the PDF comprovant (TXT is already saved in dashboard)
     try {
-      const { data: record } = await db
-        .from('checkin_records')
-        .select('txt_content, txt_filename')
-        .eq('reservation_id', recordId)
-        .maybeSingle()
-
-      const caption = `✅ Mossos confirmat\n📋 Reserva: \`${resRow?.airbnb_code ?? recordId}\``
-
-      if (record?.txt_content) {
-        const txtName = record.txt_filename ?? `mossos_${recordId}.txt`
-        await sendTelegramDocument(Buffer.from(record.txt_content, 'utf-8'), txtName, caption)
-        console.log('[mossos/complete] TXT enviado a Telegram')
-      }
-
       if (pdfBase64) {
-        const pdfName = filename ?? `comprobante_${recordId}.pdf`
+        const caption = `✅ Mossos — Subida correcta\n📋 Reserva: \`${resRow?.airbnb_code ?? recordId}\`\n📎 Comprovant adjunt`
+        const pdfName = filename ?? `comprovant_${recordId}.pdf`
         await sendTelegramDocument(Buffer.from(pdfBase64, 'base64'), pdfName, caption)
         console.log('[mossos/complete] PDF enviado a Telegram')
       }
