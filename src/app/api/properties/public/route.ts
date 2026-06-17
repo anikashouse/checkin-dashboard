@@ -18,13 +18,13 @@ export async function GET() {
   let { data, error } = await db
     .from('properties')
     .select('id, name, photo_url')
-    .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
 
   if (error?.message?.includes('photo_url')) {
     ;({ data, error } = await db
       .from('properties')
       .select('id, name')
-      .order('created_at', { ascending: true }))
+      .order('id', { ascending: true }))
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: CORS })
