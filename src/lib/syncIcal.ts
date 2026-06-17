@@ -7,7 +7,7 @@ async function fetchIcal(ical_url: string): Promise<string | null> {
   try {
     const res = await fetch(ical_url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-      next: { revalidate: 0 },
+      cache: 'no-store',
     })
     if (!res.ok) return null
     const text = await res.text()
