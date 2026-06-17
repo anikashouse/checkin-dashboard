@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { getReservationsByProperties } from '@/lib/db'
+import { syncIcalForProperties } from '@/lib/syncIcal'
 import Calendar from '@/components/Calendar'
 import PropertyCard from '@/components/PropertyCard'
 
@@ -25,6 +26,10 @@ export default async function Dashboard() {
     .eq('user_id', userId)
 
   const propertyIds = (properties || []).map(p => p.id)
+
+  // Auto-sync iCal on every dashboard visit so new reservations appear immediately
+  if (propertyIds.length > 0) await syncIcalForProperties(propertyIds)
+
   const reservations = propertyIds.length > 0 ? await getReservationsByProperties(propertyIds) : []
 
   const now = new Date()
