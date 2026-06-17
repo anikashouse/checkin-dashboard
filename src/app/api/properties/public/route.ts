@@ -21,10 +21,9 @@ export async function GET() {
     .order('id', { ascending: true })
 
   if (error?.message?.includes('photo_url')) {
-    ;({ data, error } = await db
-      .from('properties')
-      .select('id, name')
-      .order('id', { ascending: true }))
+    const fallback = await db.from('properties').select('id, name').order('id', { ascending: true })
+    data = fallback.data as typeof data
+    error = fallback.error
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: CORS })
