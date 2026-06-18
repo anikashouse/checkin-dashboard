@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
-import { generateMossosTxt } from '@/lib/mossos'
+import { generateMossosTxt, validateGuests } from '@/lib/mossos'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -31,6 +31,11 @@ export async function POST(request: NextRequest) {
 
   const mossosId = prop?.mossos_id || 'ID50044239'
   const estName  = "ANIKA'S HOUSE"
+
+  const validationErrors = validateGuests(guestData)
+  if (validationErrors.length > 0) {
+    return NextResponse.json({ error: validationErrors.join(' | ') }, { status: 422 })
+  }
 
   const txtContent = generateMossosTxt(guestData, mossosId, estName)
   const seq        = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')

@@ -101,9 +101,9 @@ function GuestEditForm({
           <Field label="Número">
             <input className={inputCls} value={form.numdoc || ''} onChange={e => set('numdoc', e.target.value.toUpperCase())} />
           </Field>
-          {form.tipo === 'D' && (
-            <Field label="Nº soporte">
-              <input className={inputCls} value={form.soporte_dni || ''} onChange={e => set('soporte_dni', e.target.value.toUpperCase())} />
+          {(form.tipo === 'D' || form.tipo === 'N') && (
+            <Field label="Nº soporte (9 chars)">
+              <input className={inputCls} maxLength={9} value={form.soporte_dni || ''} onChange={e => set('soporte_dni', e.target.value.toUpperCase())} />
             </Field>
           )}
           <Field label="F. expedición">

@@ -14,7 +14,7 @@ interface Services {
   drive_folder_id: string
 }
 
-type DriveStatus = { ok?: boolean; message?: string; error?: string; uploaded?: number; errors?: string[] }
+type DriveStatus = { ok?: boolean; message?: string; error?: string; uploaded?: number; errors?: string[]; reconnect?: boolean }
 
 const empty: Services = {
   email_enabled: false,
@@ -281,6 +281,11 @@ export default function ServicesPage() {
               {driveStatus && (
                 <div className={`text-xs rounded-lg p-3 space-y-1 ${driveStatus.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                   <p>{driveStatus.message ?? driveStatus.error}</p>
+                  {driveStatus.reconnect && (
+                    <a href="/api/auth/drive-connect" className="inline-block mt-1 underline font-medium">
+                      Volver a conectar Google Drive →
+                    </a>
+                  )}
                   {driveStatus.errors?.map((e: string, i: number) => (
                     <p key={i} className="font-mono opacity-80">• {e}</p>
                   ))}

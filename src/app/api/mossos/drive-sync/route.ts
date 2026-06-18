@@ -39,7 +39,14 @@ export async function POST() {
     try {
       subFolderId = await getOrCreateFolder(services.drive_folder_id, base, services.google_refresh_token)
     } catch (e: unknown) {
-      errors.push(`Folder ${base}: ${e instanceof Error ? e.message : String(e)}`)
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('invalid_grant')) {
+        return NextResponse.json({
+          error: 'La conexión con Google Drive ha caducado. Ve a Ajustes → Servicios y vuelve a conectar Google Drive.',
+          reconnect: true,
+        }, { status: 401 })
+      }
+      errors.push(`Folder ${base}: ${msg}`)
       continue
     }
 
@@ -54,7 +61,14 @@ export async function POST() {
         })
         uploaded++
       } catch (e: unknown) {
-        errors.push(`TXT ${base}: ${e instanceof Error ? e.message : String(e)}`)
+        const msg = e instanceof Error ? e.message : String(e)
+        if (msg.includes('invalid_grant')) {
+          return NextResponse.json({
+            error: 'La conexión con Google Drive ha caducado. Ve a Ajustes → Servicios y vuelve a conectar Google Drive.',
+            reconnect: true,
+          }, { status: 401 })
+        }
+        errors.push(`TXT ${base}: ${msg}`)
       }
     }
 
@@ -69,7 +83,14 @@ export async function POST() {
         })
         uploaded++
       } catch (e: unknown) {
-        errors.push(`PDF ${base}: ${e instanceof Error ? e.message : String(e)}`)
+        const msg = e instanceof Error ? e.message : String(e)
+        if (msg.includes('invalid_grant')) {
+          return NextResponse.json({
+            error: 'La conexión con Google Drive ha caducado. Ve a Ajustes → Servicios y vuelve a conectar Google Drive.',
+            reconnect: true,
+          }, { status: 401 })
+        }
+        errors.push(`PDF ${base}: ${msg}`)
       }
     }
   }
