@@ -25,6 +25,13 @@ export async function GET() {
     const files = await testDriveFolder(services.drive_folder_id, services.google_refresh_token)
     return NextResponse.json({ ok: true, message: 'Conexión correcta. Carpeta accesible.', filesInFolder: files.length })
   } catch (err: unknown) {
-    return NextResponse.json({ error: `Error de Drive: ${err instanceof Error ? err.message : String(err)}` }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    if (msg.includes('invalid_grant')) {
+      return NextResponse.json({
+        error: 'La conexión con Google Drive ha caducado. Vuelve a conectar Google Drive.',
+        reconnect: true,
+      }, { status: 401 })
+    }
+    return NextResponse.json({ error: `Error de Drive: ${msg}` }, { status: 500 })
   }
 }
