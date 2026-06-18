@@ -6,10 +6,16 @@ function norm(s?: string): string {
 }
 
 export function generateMossosTxt(guests: GuestData[], mossosId: string, estName: string): string {
-  const today = new Date()
-  const fconf = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
+  const spainParts = new Intl.DateTimeFormat('en', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date())
+  const sp = (t: string) => spainParts.find(p => p.type === t)?.value ?? '00'
+  const fconf = `${sp('year')}${sp('month')}${sp('day')}`
+  const hconf = sp('hour').replace('24', '00') + sp('minute')
 
-  const header = ['1', mossosId, estName, fconf, '0900', String(guests.length), 'V24'].join('|')
+  const header = ['1', mossosId, estName, fconf, hconf, String(guests.length), 'V24'].join('|')
 
   const lines = guests.map(g => {
     const tipo = g.tipo || 'P'

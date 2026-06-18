@@ -26,7 +26,24 @@ export async function POST(request: NextRequest) {
   if (!ghPat) return NextResponse.json({ error: 'GH_DISPATCH_PAT not configured' }, { status: 500 })
 
   const filename = record.txt_filename || 'mossos.txt'
-  const content  = Buffer.from(record.txt_content).toString('base64')
+
+  // Refresh header date+time to current Spain time so it's never "posterior" to upload moment
+  const spainParts = new Intl.DateTimeFormat('en', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date())
+  const get = (t: string) => spainParts.find(p => p.type === t)?.value ?? '00'
+  const nowDate = `${get('year')}${get('month')}${get('day')}`
+  const nowTime = get('hour').replace('24', '00') + get('minute')
+
+  const txtLines = record.txt_content.split(/\r?\n/)
+  if (txtLines[0]?.startsWith('1|')) {
+    const parts = txtLines[0].split('|')
+    if (parts.length >= 5) { parts[3] = nowDate; parts[4] = nowTime }
+    txtLines[0] = parts.join('|')
+  }
+  const content = Buffer.from(txtLines.join('\r\n')).toString('base64')
   const dashboardUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : 'https://checkin-dashboard-eight.vercel.app'
