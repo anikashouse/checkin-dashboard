@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
 import { uploadToDrive, getOrCreateFolder } from '@/lib/google-drive'
+import { sendTelegramDocument } from '@/lib/telegram'
 
 const db = supabaseAdmin ?? supabase
 
@@ -8,17 +9,6 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
-}
-
-async function sendTelegramDocument(buffer: Buffer, filename: string, caption: string) {
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
-  if (!token || !chatId) return
-  const fd = new FormData()
-  fd.append('chat_id', chatId)
-  fd.append('caption', caption)
-  fd.append('document', new Blob([new Uint8Array(buffer)]), filename)
-  await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: fd })
 }
 
 export async function OPTIONS() {
@@ -117,18 +107,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Telegram: send only the PDF comprovant (TXT is already saved in dashboard)
+    let notified = false
     try {
       if (pdfBase64) {
         const caption = `✅ Mossos — Subida correcta\n📋 Reserva: \`${resRow?.airbnb_code ?? recordId}\`\n📎 Comprovant adjunt`
         const pdfName = filename ?? `comprovant_${recordId}.pdf`
-        await sendTelegramDocument(Buffer.from(pdfBase64, 'base64'), pdfName, caption)
-        console.log('[mossos/complete] PDF enviado a Telegram')
+        notified = await sendTelegramDocument(
+          caption,
+          pdfName,
+          new Uint8Array(Buffer.from(pdfBase64, 'base64')),
+          'application/pdf',
+        )
+        if (!notified) console.error('[mossos/complete] certificate NOT delivered to Telegram')
       }
     } catch (tgErr) {
       console.error('[mossos/complete] Telegram error:', tgErr)
     }
 
-    return NextResponse.json({ ok: true }, { headers: corsHeaders })
+    return NextResponse.json({ ok: true, notified }, { headers: corsHeaders })
   } catch (err) {
     console.error('[mossos/complete] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders })

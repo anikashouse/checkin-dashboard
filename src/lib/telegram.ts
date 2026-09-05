@@ -30,16 +30,20 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
 export async function sendTelegramDocument(
   caption: string,
   filename: string,
-  content: string,
+  content: string | Uint8Array,
+  mimeType = 'text/plain;charset=utf-8',
 ): Promise<boolean> {
   const c = creds()
-  if (!c) return false
+  if (!c) {
+    console.error('[telegram] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not configured')
+    return false
+  }
   try {
     const fd = new FormData()
     fd.set('chat_id', c.chat)
     fd.set('caption', caption)
     fd.set('parse_mode', 'Markdown')
-    fd.set('document', new Blob([content], { type: 'text/plain;charset=utf-8' }), filename)
+    fd.set('document', new Blob([content as BlobPart], { type: mimeType }), filename)
     const res = await fetch(`${API}/bot${c.token}/sendDocument`, { method: 'POST', body: fd })
     if (!res.ok) console.error('[telegram] sendDocument failed:', res.status, await res.text())
     return res.ok
