@@ -21,11 +21,13 @@ export async function POST(request: NextRequest) {
     const code = String(airbnbCode ?? '—').replace(/[^A-Za-z0-9-]/g, '').slice(0, 20) || '—'
     const reason = String(message ?? '').replace(/[`*_\[\]]/g, '').slice(0, 200) || 'sin detalle'
 
-    await sendTelegramMessage(
+    // Report whether it actually went out. Answering ok to a dropped notification is
+    // the silent failure that let the Telegram outage run unnoticed for two months.
+    const sent = await sendTelegramMessage(
       `⚠️ *Error IA — Check-in*\n📋 Reserva: \`${code}\`\n🔴 ${reason}`
     )
 
-    return NextResponse.json({ ok: true }, { headers: CORS })
+    return NextResponse.json({ ok: true, sent }, { headers: CORS })
   } catch {
     return NextResponse.json({ ok: false }, { status: 400, headers: CORS })
   }
