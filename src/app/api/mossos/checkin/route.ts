@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
+import { dispatchMossosUpload } from '@/lib/mossos-dispatch'
+import { buildCheckinCaption, sendTelegramDocument, sendTelegramMessage } from '@/lib/telegram'
 
 const db = supabaseAdmin ?? supabase
 
@@ -107,7 +109,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
     }
 
-    return NextResponse.json({ ok: true }, { headers: corsHeaders })
+    // Notification and the Mossos upload now happen here rather than in the guest's
+    // browser, so no bot token or GitHub PAT ever ships to the public check-in page.
+    // Both are best-effort: the record is already saved, and a failure here must not
+    // make the guest think their check-in did not go through.
+    const { data: prop } = await db
+      .from('properties')
+      .select('name')
+      .eq('id', reservation.property_id)
+      .maybeSingle()
+
+    const filename = txtFilename ?? 'mossos.txt'
+    const caption = buildCheckinCaption({
+      airbnbCode: airbnbCode.toUpperCase(),
+      propertyName: prop?.name?.trim(),
+      guestData: guestData ?? [],
+      filename,
+      taxPaymentMethod: taxPaymentMethod ?? null,
+    })
+
+    const [notified, dispatched] = await Promise.all([
+      txtContent
+        ? sendTelegramDocument(caption, filename, txtContent)
+        : sendTelegramMessage(caption),
+      dispatchMossosUpload(reservation.id),
+    ])
+
+    if (!notified) console.error('[mossos/checkin] telegram notification failed')
+    if (!dispatched.ok) console.error('[mossos/checkin] mossos dispatch failed:', dispatched.error)
+
+    return NextResponse.json(
+      { ok: true, notified, mossosDispatched: dispatched.ok },
+      { headers: corsHeaders }
+    )
   } catch (err) {
     console.error('[mossos/checkin] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders })
