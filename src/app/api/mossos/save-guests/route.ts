@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
 import { generateMossosTxt, validateGuests } from '@/lib/mossos'
+import { dedupeGuests } from '@/lib/dedupeGuests'
 import type { GuestData } from '@/lib/types'
 
 const db = supabaseAdmin ?? supabase
@@ -11,10 +12,12 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { reservationId, guestData }: { reservationId: string; guestData: GuestData[] } = await request.json()
-  if (!reservationId || !guestData?.length) {
+  const { reservationId, guestData: rawGuests }: { reservationId: string; guestData: GuestData[] } = await request.json()
+  if (!reservationId || !rawGuests?.length) {
     return NextResponse.json({ error: 'reservationId and guestData required' }, { status: 400 })
   }
+  // Safety net: collapse the same person entered twice (name + DOB) before storing.
+  const guestData = dedupeGuests(rawGuests)
 
   const { data: res } = await db
     .from('reservations')

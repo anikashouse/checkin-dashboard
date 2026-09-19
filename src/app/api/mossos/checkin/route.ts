@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
 import { dispatchMossosUpload } from '@/lib/mossos-dispatch'
+import { generateMossosTxt } from '@/lib/mossos'
+import { dedupeGuests } from '@/lib/dedupeGuests'
 import { buildCheckinCaption, sendTelegramDocument, sendTelegramMessage } from '@/lib/telegram'
 
 const db = supabaseAdmin ?? supabase
@@ -67,6 +69,29 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString()
 
+    // Safety net: if the guest scanned the same person twice (same name + DOB,
+    // document number varies with OCR), collapse it. Only when a duplicate was
+    // actually removed do we regenerate the .txt server-side so guest_data and the
+    // file stay consistent — normal check-ins are stored exactly as sent.
+    let guests = guestData
+    let finalTxt = txtContent
+    if (Array.isArray(guestData)) {
+      const deduped = dedupeGuests(guestData)
+      if (deduped.length < guestData.length) {
+        guests = deduped
+        const { data: prop } = await db
+          .from('properties')
+          .select('mossos_id')
+          .eq('id', reservation.property_id)
+          .maybeSingle()
+        try {
+          finalTxt = generateMossosTxt(deduped, prop?.mossos_id || 'ID50044239', "ANIKA'S HOUSE")
+        } catch (e) {
+          console.error('[mossos/checkin] txt regen after dedupe failed:', e)
+        }
+      }
+    }
+
     // Check if a record already exists for this reservation
     const { data: existing } = await db
       .from('checkin_records')
@@ -80,8 +105,8 @@ export async function POST(request: NextRequest) {
       ;({ error } = await db
         .from('checkin_records')
         .update({
-          guest_data: guestData ?? null,
-          txt_content: txtContent ?? null,
+          guest_data: guests ?? null,
+          txt_content: finalTxt ?? null,
           txt_filename: txtFilename ?? null,
           form_complete: true,
           tax_payment_method: taxPaymentMethod ?? null,
@@ -94,8 +119,8 @@ export async function POST(request: NextRequest) {
         reservation_id: reservation.id,
         property_id: reservation.property_id,
         airbnb_code: airbnbCode.toUpperCase(),
-        guest_data: guestData ?? null,
-        txt_content: txtContent ?? null,
+        guest_data: guests ?? null,
+        txt_content: finalTxt ?? null,
         txt_filename: txtFilename ?? null,
         form_complete: true,
         tax_payment_method: taxPaymentMethod ?? null,
@@ -123,7 +148,7 @@ export async function POST(request: NextRequest) {
     const caption = buildCheckinCaption({
       airbnbCode: airbnbCode.toUpperCase(),
       propertyName: prop?.name?.trim(),
-      guestData: guestData ?? [],
+      guestData: guests ?? [],
       filename,
       taxPaymentMethod: taxPaymentMethod ?? null,
     })

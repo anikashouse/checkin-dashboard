@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { GuestData } from '@/lib/types'
+import { dedupeGuests, hasDuplicateGuests } from '@/lib/dedupeGuests'
 
 // ── helpers ─────────────────────────────────────────────
 function fmtDate(s?: string) {
@@ -204,7 +205,7 @@ function GuestEditForm({
 }
 
 // ── read-only guest card ─────────────────────────────────
-function GuestCardView({ g, index, onEdit }: { g: GuestData; index: number; onEdit: () => void }) {
+function GuestCardView({ g, index, onEdit, onDelete, canDelete }: { g: GuestData; index: number; onEdit: () => void; onDelete: () => void; canDelete: boolean }) {
   const fullName = [g.ap1, g.ap2, g.nom].filter(Boolean).join(' ') || `Huésped ${index + 1}`
   const demographics = [SEX_LABEL[g.sexe || ''], g.nac, fmtDate(g.naix), g.menor === 'S' ? 'Menor' : null].filter(Boolean).join(' · ')
   const city = g.municipio || g.localidad
@@ -220,12 +221,22 @@ function GuestCardView({ g, index, onEdit }: { g: GuestData; index: number; onEd
           <p className="font-bold text-slate-900 text-sm">{fullName}</p>
           {demographics && <p className="text-[10px] text-slate-400 mt-0.5">{demographics}</p>}
         </div>
-        <button
-          onClick={onEdit}
-          className="text-[10px] text-slate-400 hover:text-slate-700 border border-slate-200 rounded px-2 py-0.5 transition-colors"
-        >
-          Editar
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={onEdit}
+            className="text-[10px] text-slate-400 hover:text-slate-700 border border-slate-200 rounded px-2 py-0.5 transition-colors"
+          >
+            Editar
+          </button>
+          {canDelete && (
+            <button
+              onClick={onDelete}
+              className="text-[10px] text-red-400 hover:text-red-600 border border-red-100 rounded px-2 py-0.5 transition-colors"
+            >
+              Eliminar
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="divide-y divide-gray-100">
@@ -287,17 +298,69 @@ export default function EditGuestCards({
 }) {
   const router = useRouter()
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
 
   function handleSaved() {
     setEditingIndex(null)
     router.refresh()
   }
 
+  // Persist a new guest array (delete / merge duplicates). save-guests dedupes,
+  // regenerates the .txt and sets mossos_sent=false so it can be re-sent.
+  async function persist(updated: GuestData[]) {
+    setBusy(true)
+    setErr('')
+    try {
+      const res = await fetch('/api/mossos/save-guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId, guestData: updated }),
+      })
+      if (!res.ok) { const j = await res.json(); throw new Error(j.error || 'Error') }
+      router.refresh()
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function deleteGuest(index: number) {
+    const g = guests[index]
+    const name = [g.ap1, g.ap2, g.nom].filter(Boolean).join(' ') || `Huésped ${index + 1}`
+    if (guests.length <= 1) { setErr('No puedes eliminar el único viajero de la reserva.'); return }
+    if (!confirm(`¿Eliminar a ${name} de esta reserva? Se regenerará el parte de Mossos.`)) return
+    persist(guests.filter((_, i) => i !== index))
+  }
+
+  const dupes = hasDuplicateGuests(guests)
+
   return (
     <div className="flex flex-col gap-3 pb-6">
+      {dupes && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2">
+          <span className="text-[11px] text-orange-800">Se han detectado <b>viajeros duplicados</b> (misma persona registrada dos veces).</span>
+          <button
+            onClick={() => persist(dedupeGuests(guests))}
+            disabled={busy}
+            className="shrink-0 rounded bg-orange-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+          >
+            {busy ? 'Combinando…' : 'Combinar duplicados'}
+          </button>
+        </div>
+      )}
+      {err && <p className="text-[11px] text-red-500">{err}</p>}
+
       {guests.map((g, i) => (
         <div key={i} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <GuestCardView g={g} index={i} onEdit={() => setEditingIndex(i)} />
+          <GuestCardView
+            g={g}
+            index={i}
+            onEdit={() => setEditingIndex(i)}
+            onDelete={() => deleteGuest(i)}
+            canDelete={guests.length > 1 && !busy}
+          />
           {editingIndex === i && (
             <GuestEditForm
               g={g}
